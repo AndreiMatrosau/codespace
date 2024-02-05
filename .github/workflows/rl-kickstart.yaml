@@ -28,7 +28,7 @@ jobs:
 
     - name: Run `packer validate`
       id: validate_packer
-      run: "packer validate ./rl9.pkr.hcl"
+      run: "packer validate ."
 
     - name: Build image
       run: packer build rhel.json
