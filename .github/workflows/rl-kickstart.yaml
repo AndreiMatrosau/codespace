@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  PRODUCT_VERSION: "v2.0.1"
+  PRODUCT_VERSION: "1.10.1"
 
 jobs:
   build:
