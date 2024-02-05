@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  PRODUCT_VERSION: "2.0.1"
+  PRODUCT_VERSION: "v2.0.1"
 
 jobs:
   build:
@@ -24,11 +24,11 @@ jobs:
 
     - name: Run `packer init`
       id: init_packer
-      run: "packer init ./image.pkr.hcl"
+      run: "packer init ./rl9.pkr.hcl"
 
     - name: Run `packer validate`
       id: validate_packer
-      run: "packer validate ./image.pkr.hcl"
+      run: "packer validate ./rl9.pkr.hcl"
 
     - name: Build image
       run: packer build rhel.json
