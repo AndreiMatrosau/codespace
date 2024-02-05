@@ -25,5 +25,13 @@ build {
     inline          = ["apt-get update", "apt-get upgrade -y", "apt-get -y install nginx", "/usr/sbin/waagent -force -deprovision+user && export HISTSIZE=0 && sync"]
     inline_shebang  = "/bin/sh -x"
   }
+}
 
+packer {
+  required_plugins {
+    azure = {
+      source  = "github.com/hashicorp/azure"
+      version = ">= 2.0.2"
+    }
+  }
 }
