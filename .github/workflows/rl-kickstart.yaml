@@ -47,17 +47,7 @@ jobs:
 
       - name: Create VM
         id: create_vm
-        run: |
-          az vm create \
-          --resource-group pg-packer-vm \
-          --location northeurope \
-          --name packer-rl9 \
-          --image /subscriptions/c6a76d9c-0f67-4a42-b2a1-3defb05f2aae/resourceGroups/rg-packer/providers/Microsoft.Compute/images/rl9 \
-          --plan-name rockylinux-x86_64-9 \
-          --plan-product rockylinux-x86_64 \
-          --plan-publisher resf \          
-          --admin-username azureuser \
-          --generate-ssh-keys
+        run: az vm create --resource-group pg-packer-vm --location northeurope --name packer-rl9 --image /subscriptions/c6a76d9c-0f67-4a42-b2a1-3defb05f2aae/resourceGroups/rg-packer/providers/Microsoft.Compute/images/rl9 --plan-name rockylinux-x86_64-9 --plan-product rockylinux-x86_64 --plan-publisher resf --admin-username azureuser --generate-ssh-keys
 
       - name: Open VM port
         id: open_vm_port
