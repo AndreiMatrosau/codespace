@@ -56,3 +56,11 @@ jobs:
           --resource-group pg-packer-vm \
           --name packer-rl9 \
           --port 22
+
+#     - name: Run tests
+#       run: ssh -i /home/azureuser/.ssh/id_rsa azureuser@myVM 'bash -s' < test-script.sh
+
+#     - name: Shutdown and dismantle VM
+#       run: |
+#         az vm deallocate --resource-group myResourceGroup --name myVM
+#         az vm delete --resource-group myResourceGroup --name myVM --yes
