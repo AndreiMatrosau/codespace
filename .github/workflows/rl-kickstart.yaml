@@ -52,7 +52,7 @@ jobs:
           --resource-group pg-packer-vm \
           --location northeurope \
           --name packer-rl9 \
-          --image rl9 \
+          --image /subscriptions/c6a76d9c-0f67-4a42-b2a1-3defb05f2aae/resourceGroups/rg-packer/providers/Microsoft.Compute/images/rl9 \
           --admin-username azureuser \
           --generate-ssh-keys
 
