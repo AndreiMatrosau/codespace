@@ -38,7 +38,7 @@ jobs:
 
       - name: Build Image
         id: build_image
-        run: packer build -var 'azure_client_id=${{ secrets.AZURE_CLIENT_ID }}' -var 'azure_client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' -var 'azure_tenant_id=${{ secrets.AZURE_TENANT_ID }}' -var 'azure_subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' ./rl9.pkr.hcl
+        run: packer build -var ./rl9.pkr.hcl
 
       - name: Create Resource group
         id: create_resource_group
