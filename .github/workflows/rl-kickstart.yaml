@@ -31,7 +31,7 @@ jobs:
       run: "packer validate ."
 
     - name: Build image
-      run: packer build rhel.json
+      run: packer build ./rl9.pkr.hcl
 
     - name: Login to Azure
       uses: azure/login@v1
