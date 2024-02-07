@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+env:
+  PRODUCT_VERSION: "1.10.1"
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -16,7 +19,9 @@ jobs:
 
       - name: Set up Packer
         id: setup_packer
-        uses: hashicorp/setup-packer@v2
+        uses: hashicorp/setup-packer@main
+        with:
+          version: ${{ env.PRODUCT_VERSION }}
 
       - name: Login to Azure
         uses: azure/login@v1
