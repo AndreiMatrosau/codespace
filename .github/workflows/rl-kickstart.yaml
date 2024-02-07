@@ -1,62 +1,36 @@
-name: Build and Deploy VM
+name: Build and Deploy Azure VM Image
 
 on:
   push:
     branches:
       - main
 
-env:
-  PRODUCT_VERSION: "1.10.1"
-
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout Repository
+        id: checkout
+        uses: actions/checkout@v4
 
-    - name: Setup `packer`
-      uses: hashicorp/setup-packer@main
-      id: setup
-      with:
-        version: ${{ env.PRODUCT_VERSION }}
+      - name: Set up Packer
+        id: setup_packer
+        uses: hashicorp/setup-packer@v2
 
-    - name: Run `packer init`
-      id: init_packer
-      run: "packer init ./rl9.pkr.hcl"
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Run `packer validate`
-      id: validate_packer
-      run: "packer validate ."
+      - name: Run `packer init`
+        id: init_packer
+        run: "packer init ./rl9.pkr.hcl"
 
-    - name: Build image
-      run: packer build ./rl9.pkr.hcl
+      - name: Run `packer validate`
+        id: validate_packer
+        run: "packer validate ./rl9.pkr.hcl"
 
-    - name: Login to Azure
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-    - name: Create VM
-      run: |
-        az group create -n myResourceGroup -l eastus
-        az vm create \
-        --resource-group myResourceGroup \
-        --location eastus \
-        --vnet-name myVnet \
-        --subnet mySubnet \
-        --size Standard_DS1_v2 \
-        --name myVM \
-        --image myPackerImage \
-        --admin-username azureuser \
-        --os-disk-name \
-        --generate-ssh-keys \
-
-    - name: Run tests
-      run: ssh -i /home/azureuser/.ssh/id_rsa azureuser@myVM 'bash -s' < test-script.sh
-
-    - name: Shutdown and dismantle VM
-      run: |
-        az vm deallocate --resource-group myResourceGroup --name myVM
-        az vm delete --resource-group myResourceGroup --name myVM --yes
+      - name: Build Image
+        id: build_image
+        run: packer build -var 'azure_client_id=${{ secrets.AZURE_CLIENT_ID }}' -var 'azure_client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' -var 'azure_tenant_id=${{ secrets.AZURE_TENANT_ID }}' -var 'azure_subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' packer.json
