@@ -59,16 +59,20 @@ jobs:
             --admin-username azureuser \
             --generate-ssh-keys
 
-      - name: Open VM port
-        id: open_vm_port
+      - name: Get tree
         run: |
-          az vm open-port \
-          --resource-group pg-packer-vm \
-          --name packer-rl9 \
-          --port 22
+          ls ~/.ssh
 
-      - name: Run tests
-        run: ssh -i /home/azureuser/.ssh/id_rsa azureuser@packer-rl9 'bash -s' < test-script.sh
+      # - name: Open VM port
+      #   id: open_vm_port
+      #   run: |
+      #     az vm open-port \
+      #     --resource-group pg-packer-vm \
+      #     --name packer-rl9 \
+      #     --port 22
+
+      # - name: Run tests
+      #   run: ssh -i /home/azureuser/.ssh/id_rsa azureuser@packer-rl9 'bash -s' < test-script.sh
 
       - name: Shutdown and dismantle VM
         run: |
