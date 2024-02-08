@@ -19,7 +19,7 @@ source "azure-arm" "this" {
 
   plan_info {
     plan_name      = "${var.plan_name}"
-    plan_product   = "${var.plan_info}"
+    plan_product   = "${var.plan_product}"
     plan_publisher = "${var.plan_publisher}"
   }
 }
