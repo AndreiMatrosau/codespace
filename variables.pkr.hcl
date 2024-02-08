@@ -25,6 +25,26 @@ variable "subscription_id" {
   default = "c6a76d9c-0f67-4a42-b2a1-3defb05f2aae"
 }
 
+variable "os_type" {
+    type    = string
+    default = "Linux"
+}
+
+variable "image_offer" {
+    type    = string
+    default = "rockylinux-x86_64"
+}
+
+variable "image_publisher" {
+    type    = string
+    default = "resf"
+}
+
+variable "image_sku" {
+    type    = string
+    default = "rockylinux-x86_64-9"
+}
+
 variable "location" {
   type    = string
   default = "North Europe"
