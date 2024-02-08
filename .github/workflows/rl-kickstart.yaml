@@ -23,6 +23,7 @@ jobs:
 
       - name: Check if Packer cfg is changed
         id: check_if_files_changed
+        shell: bash
         run: |
           pwd
           # Diff HEAD with the previous commit
