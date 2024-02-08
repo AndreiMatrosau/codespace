@@ -21,23 +21,23 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Check if Packer cfg is changed
-        id: check_if_files_changed
-        run: |
-          # Diff HEAD with the previous commit
-          diff=$(git diff --name-only HEAD~1 HEAD)
+      # - name: Check if Packer cfg is changed
+      #   id: check_if_files_changed
+      #   run: |
+      #     # Diff HEAD with the previous commit
+      #     diff=$(git diff --name-only HEAD~1 HEAD)
 
-          # Check if a files with the .pkr.hcl extension have changed
-          source_diff=$(echo "$diff" | grep -E '\.pkr\.hcl$')
-          have_diff=false
+      #     # Check if a files with the .pkr.hcl extension have changed
+      #     source_diff=$(echo "$diff" | grep -E '\.pkr\.hcl$')
+      #     have_diff=false
 
-          # Check if there are changes
-          if [ -n "$source_diff" ]; then
-           have_diff=true
-          fi
+      #     # Check if there are changes
+      #     if [ -n "$source_diff" ]; then
+      #      have_diff=true
+      #     fi
 
-          # Set the output named "pkr_cfg_changed"
-          echo "::set-output name=pkr_cfg_changed::$have_diff"
+      #     # Set the output named "pkr_cfg_changed"
+      #     echo "::set-output name=pkr_cfg_changed::$have_diff"
 
       - name: Set up Packer
         id: setup_packer
@@ -60,7 +60,7 @@ jobs:
 
       - name: Build Image
         id: build_packer_image
-        if: steps.check_if_files_changed.outputs.pkr_cfg_changed == true
+#        if: steps.check_if_files_changed.outputs.pkr_cfg_changed == true
         run: packer build ./rl9.pkr.hcl
 
       - name: Create VM Resource group

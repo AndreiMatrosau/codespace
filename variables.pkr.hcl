@@ -8,21 +8,25 @@ variable "azure_tags" {
 variable "client_id" {
   type    = string
   default = "64dca93a-148e-4a35-aabc-8e05bd2b944f"
+  sensitive = true
 }
 
 variable "client_secret" {
   type    = string
   default = "2eV8Q~Y-N1a2NuKr6.xYYcDtLn1eSxYXwY5kndvo"
+  sensitive = true
 }
 
 variable "tenant_id" {
   type    = string
   default = "1ea1c520-b78c-4463-b9d4-d8d99073052c"
+  sensitive = true
 }
 
 variable "subscription_id" {
   type    = string
   default = "c6a76d9c-0f67-4a42-b2a1-3defb05f2aae"
+  sensitive = true
 }
 
 variable "os_type" {
