@@ -99,7 +99,7 @@ variable "plan_info" {
   default     = {
     plan_name      = "rockylinux-x86_64-9"
     plan_product   = "rockylinux-x86_64"
-    plan_publisher = "plan_publisher"
+    plan_publisher = "resf"
   } 
 }
 
