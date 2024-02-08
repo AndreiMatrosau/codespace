@@ -52,16 +52,16 @@ jobs:
 
       - name: Run `packer init`
         id: init_packer
-        run: "packer init ./rl9.pkr.hcl"
+        run: "packer init ."
 
       - name: Run `packer validate`
         id: validate_packer
-        run: "packer validate ./rl9.pkr.hcl"
+        run: "packer validate ."
 
       - name: Build Image
         id: build_packer_image
 #        if: steps.check_if_files_changed.outputs.pkr_cfg_changed == true
-        run: packer build ./rl9.pkr.hcl
+        run: packer build .
 
       - name: Create VM Resource group
         id: create_vm_resource_group
