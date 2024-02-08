@@ -18,6 +18,8 @@ jobs:
       - name: Checkout Repository
         id: checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
       - name: Set up Packer
         id: setup_packer
@@ -31,7 +33,7 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Check if Packer cfg is changed
-        id: chack_file_changed
+        id: check_file_changed
         run: |
           # Diff HEAD with the previous commit
           diff=$(git diff --name-only HEAD~1 HEAD)
