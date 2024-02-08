@@ -29,7 +29,7 @@ build {
 
   provisioner "shell" {
     execute_command = "${var.execute_command}"
-    inline          = "${var.inline}"
+    inline          = "${var.provisioner_inline_commands}"
     inline_shebang  = "${var.inline_shebang}"
   }
 }
