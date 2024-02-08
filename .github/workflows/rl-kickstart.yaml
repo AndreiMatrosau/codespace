@@ -82,7 +82,7 @@ jobs:
             --name packer-rl9 \
             --query publicIps \
             --output tsv)
-          echo ${PUBLIC_IP}
+          ssh-keyscan -H -t rsa ${PUBLIC_IP}  >> ~/.ssh/known_hosts
           ssh -i ~/.ssh/id_rsa azureuser@${PUBLIC_IP} 'bash -s' < test-script.sh
 
       - name: Shutdown and dismantle VM
@@ -97,5 +97,6 @@ jobs:
             --force-deletion none \
             --yes
           az group delete \
-            --name rg-packer-vm
+            --name rg-packer-vm \
+            --yes
 
