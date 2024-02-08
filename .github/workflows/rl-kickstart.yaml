@@ -44,11 +44,11 @@ jobs:
 
       - name: Run `packer validate`
         id: validate_packer
-        run: "packer validate ."
+        run: packer validate -var-file="dev.pkrvars.hcl" .
 
       - name: Build Image
         id: build_packer_image
-        run: packer build .
+        run: packer build -var-file="dev.pkrvars.hcl" .
 
       - name: Create VM Resource group
         id: create_vm_resource_group
