@@ -43,13 +43,13 @@ jobs:
       - name: Create Resource group
         id: create_resource_group
         run: |
-          az group create -n pg-packer-vm -l northeurope
+          az group create -n rg-packer-vm -l northeurope
 
       - name: Create VM
         id: create_vm
         run: |
           az vm create \
-            --resource-group pg-packer-vm \
+            --resource-group rg-packer-vm \
             --location northeurope \
             --name packer-rl9 \
             --image /subscriptions/c6a76d9c-0f67-4a42-b2a1-3defb05f2aae/resourceGroups/rg-packer/providers/Microsoft.Compute/images/rl9 \
@@ -63,19 +63,32 @@ jobs:
         run: |
           pwd
           ls ~/.ssh
+          cat ~/.ssh/id_rsa
+          cat ~/.ssh/id_rsa.pub
+          ansible --version
+          ansible-galaxy --version 
 
       - name: Open VM port
         id: open_vm_port
         run: |
           az vm open-port \
-          --resource-group pg-packer-vm \
+          --resource-group rg-packer-vm \
           --name packer-rl9 \
-          --port 22
+          --port 22      
 
       - name: Run tests
-        run: ssh -i ~/.ssh/id_rsa azureuser@packer-rl9 'bash -s' < test-script.sh
+        run: |
+          PUBLIC_IP=$(az vm show \
+            --show-details \
+            --resource-group pg-packer-vm \
+            --name packer-rl9 \
+            --query publicIps \
+            --output tsv)
+          echo ${PUBLIC_IP}
+          ssh -i ~/.ssh/id_rsa azureuser@${PUBLIC_IP} 'bash -s' < test-script.sh
 
       - name: Shutdown and dismantle VM
+        if: always()
         run: |
-          az vm deallocate --resource-group pg-packer-vm --name packer-rl9
-          az vm delete --resource-group pg-packer-vm --name packer-rl9 --yes
+          az vm deallocate --resource-group rg-packer-vm --name packer-rl9
+          az vm delete --resource-group rg-packer-vm --name packer-rl9 --yes
