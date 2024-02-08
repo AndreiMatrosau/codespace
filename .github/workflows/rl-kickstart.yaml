@@ -33,7 +33,9 @@ jobs:
           have_diff=false
 
           # Check if there are changes
-          if [ -n "$source_diff" ]; then have_diff=true fi
+          if [ -n "$source_diff" ]; then
+           have_diff=true
+          fi
 
           # Set the output named "pkr_cfg_changed"
           echo "::set-output name=pkr_cfg_changed::$have_diff"
