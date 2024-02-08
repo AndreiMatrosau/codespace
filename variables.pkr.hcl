@@ -1,96 +1,120 @@
 variable "azure_tags" {
-  type = map(string)
+  type        = map(string)
+  description = "Name/value pair tags to apply to every resource deployed."
   default = {
     env = "dev"
   }
 }
 
 variable "client_id" {
-  type    = string
-  default = "64dca93a-148e-4a35-aabc-8e05bd2b944f"
+  type      = string
+  description = "The application ID of the AAD Service Principal."
+  default   = "64dca93a-148e-4a35-aabc-8e05bd2b944f"
   sensitive = true
 }
 
 variable "client_secret" {
-  type    = string
-  default = "2eV8Q~Y-N1a2NuKr6.xYYcDtLn1eSxYXwY5kndvo"
+  type      = string
+  description = "A password/secret registered for the AAD SP."
+  default   = "2eV8Q~Y-N1a2NuKr6.xYYcDtLn1eSxYXwY5kndvo"
   sensitive = true
 }
 
 variable "tenant_id" {
   type    = string
+  description = "The Active Directory tenant identifier with which client_id and subscription_id are associated."
   default = "1ea1c520-b78c-4463-b9d4-d8d99073052c"
   sensitive = true
 }
 
 variable "subscription_id" {
   type    = string
+  description = "The subscription to use."
   default = "c6a76d9c-0f67-4a42-b2a1-3defb05f2aae"
   sensitive = true
 }
 
 variable "os_type" {
     type    = string
+    description = "If either Linux or Windows is specified Packer will automatically configure authentication credentials for the provisioned machine."
     default = "Linux"
 }
 
 variable "image_offer" {
-    type    = string
-    default = "rockylinux-x86_64"
+    type        = string
+    description = "Name of the publisher's offer to use for your base image (Azure Marketplace Images only)."
+    default     = "rockylinux-x86_64"
 }
 
 variable "image_publisher" {
-    type    = string
-    default = "resf"
+    type        = string
+    description = "Name of the publisher to use for your base image (Azure Marketplace Images only)."
+    default     = "resf"
 }
 
 variable "image_sku" {
-    type    = string
-    default = "rockylinux-x86_64-9"
+    type        = string
+    description = "SKU of the image offer to use for your base image (Azure Marketplace Images only)."
+    default     = "rockylinux-x86_64-9"
 }
 
 variable "location" {
-  type    = string
-  default = "North Europe"
+  type        = string
+  description = "Azure datacenter in which your VM will build."
+  default     = "North Europe"
+}
+
+variable "temp_resource_group_name" {
+  type        = string
+  description = "Name assigned to the temporary resource group created during the build."
+  default     = "rg-temp-packer-vm-build"
 }
 
 variable "managed_image_name" {
-  type    = string
-  default = "rl9"
+  type        = string
+  description = "Specify the managed image name where the result of the Packer build will be saved."
+  default     = "rl9"
 }
 
 variable "managed_image_resource_group_name" {
-  type    = string
-  default = "rg-packer"
+  type        = string
+  description = "Specify the managed image resource group name where the result of the Packer build will be saved."
+  default     = "rg-packer"
 }
 
 variable "vm_size" {
   type    = string
+  description = "Size of the VM used for building."
   default = "Standard_DS2_v2"
 }
 
 variable "plan_name" {
   type    = string
+  description = "The plan name, required."
   default = "rockylinux-x86_64-9"
 }
 
 variable "plan_product" {
   type    = string
+  description = "The plan product, required."
   default = "rockylinux-x86_64"
 }
 
 variable "plan_publisher" {
   type    = string
+  description = "The plan publisher, required."
   default = "resf"
 }
 
 variable "execute_command" {
   type    = string
+  description = "The command to use to execute the script."
   default = "chmod +x {{ .Path }}; {{ .Vars }} sudo -E sh '{{ .Path }}'"
 }
 
 variable "provisioner_inline_commands" {
   type = list(string)
+  description = "This is an array of commands to execute."
   default = [
     "dnf -y update",
     "dnf install -y epel-release",
@@ -101,4 +125,10 @@ variable "provisioner_inline_commands" {
 variable "inline_shebang" {
   type    = string
   default = "/bin/sh -x"
+}
+
+variable "scripts" {
+  type        = list(string)
+  description = "An array of scripts to execute. The scripts will be uploaded and executed in the order specified."
+  default     = []
 }

@@ -1,8 +1,8 @@
 source "azure-arm" "this" {
-  client_id                         = "${var.client_id}"
-  client_secret                     = "${var.client_secret}"
-  tenant_id                         = "${var.tenant_id}"
-  subscription_id                   = "${var.subscription_id}"
+  client_id                         = var.client_id
+  client_secret                     = var.client_secret
+  tenant_id                         = var.tenant_id
+  subscription_id                   = var.subscription_id
 
   os_type                           = "${var.os_type}"
   image_offer                       = "${var.image_offer}"
@@ -10,6 +10,7 @@ source "azure-arm" "this" {
   image_sku                         = "${var.image_sku}"
 
   location                          = "${var.location}"
+  temp_resource_group_name          = var.temp_resource_group_name
   vm_size                           = "${var.vm_size}"
   
   azure_tags                        = "${var.azure_tags}"
@@ -30,7 +31,8 @@ build {
   provisioner "shell" {
     execute_command = "${var.execute_command}"
     inline          = "${var.provisioner_inline_commands}"
-    inline_shebang  = "${var.inline_shebang}"
+#    inline_shebang  = "${var.inline_shebang}"
+    scripts         = $var.scripts
   }
 }
 
