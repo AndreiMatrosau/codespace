@@ -24,6 +24,7 @@ jobs:
       - name: Check if Packer cfg is changed
         id: check_if_files_changed
         run: |
+          pwd
           # Diff HEAD with the previous commit
           diff=$(git diff --name-only HEAD~1 HEAD)
           echo $diff
@@ -31,11 +32,13 @@ jobs:
           # Check if a files with the .pkr.hcl extension have changed
           source_diff=$(echo "$diff" | grep -E '\.pkr.hcl$')
           have_diff=false
+          echo $source_diff
 
           # Check if there are changes
           if [ -n "$source_diff" ]; then
            have_diff=true
           fi
+          echo $have_diff
 
           # Set the output named "pkr_cfg_changed"
           echo "::set-output name=pkr_cfg_changed::$have_diff"
