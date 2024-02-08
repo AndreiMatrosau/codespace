@@ -1,9 +1,11 @@
-name: Build and Deploy Azure VM Image
+name: CIS tests with Packer Azure VM Image
 
 on:
+  repository_dispatch:
   push:
     branches:
       - main
+      - feature/ga_cis_tests
 
 env:
   PRODUCT_VERSION: "1.10.1"
@@ -28,6 +30,24 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: Check if Packer cfg is changed
+        id: chack_file_changed
+        run: |
+          # Diff HEAD with the previous commit
+          diff=$(git diff --name-only HEAD^ HEAD)
+
+          # Check if a files with the .pkr.hcl extension have changed
+          source_diff=$(echo "$diff" | grep -E '\.pkr.hcl$')
+          have_diff=false
+
+          # Check if there are changes
+          if [ -n "$source_diff" ]; then
+              have_diff=true
+          fi
+
+          # Set the output named "pkr_cfg_changed"
+          echo "::set-output name=pkr_cfg_changed::$have_diff"
+
       - name: Run `packer init`
         id: init_packer
         run: "packer init ./rl9.pkr.hcl"
@@ -37,11 +57,12 @@ jobs:
         run: "packer validate ./rl9.pkr.hcl"
 
       - name: Build Image
-        id: build_image
+        id: build_packer_image
+        if: steps.chack_file_changed.outputs.pkr_cfg_changed == true
         run: packer build ./rl9.pkr.hcl
 
-      - name: Create Resource group
-        id: create_resource_group
+      - name: Create VM Resource group
+        id: create_vm_resource_group
         run: |
           az group create -n rg-packer-vm -l northeurope
 
@@ -61,20 +82,16 @@ jobs:
             --admin-username azureuser \
             --generate-ssh-keys
 
-      - name: Get tree
-        run: |
-          cat ~/.ssh/id_rsa
-          cat ~/.ssh/id_rsa.pub
-
-      - name: Open VM port
-        id: open_vm_port
+      - name: Open VM SSH port
+        id: open_vm_ssh_port
         run: |
           az vm open-port \
           --resource-group rg-packer-vm \
           --name packer-rl9 \
           --port 22      
 
-      - name: Run tests
+      - name: Run CIS Rocky Linux tests
+        id: cis_tests
         run: |
           PUBLIC_IP=$(az vm show \
             --show-details \
@@ -87,6 +104,7 @@ jobs:
 
       - name: Shutdown and dismantle VM
         if: always()
+        id: shutdown_dismantle_vm
         run: |
           az vm deallocate \
             --resource-group rg-packer-vm \
@@ -96,7 +114,10 @@ jobs:
             --name packer-rl9 \
             --force-deletion none \
             --yes
+
+      - name: Delete VM Resource group
+        id: delete_vm_rg
+        run: |
           az group delete \
             --name rg-packer-vm \
             --yes
-
