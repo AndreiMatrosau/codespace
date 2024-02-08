@@ -8,7 +8,13 @@ on:
       - feature/ga_packer_vm_cis_test
 
 env:
-  PRODUCT_VERSION: "1.10.1"
+  PRODUCT_VERSION: ${{ vars.PRODUCT_VERSION }}
+  RESOURCE_GROUP_NAME: ${{ vars.RESOURCE_GROUP_NAME }}
+  LOCATION: ${{ vars.LOCATION }}
+  VM_NAME: ${{ vars.VM_NAME }}
+  IMAGE: ${{ vars.IMAGE }}
+  PLAN_PRODUCT: ${{ vars.PLAN_PRODUCT }}
+  PLAN_PUBLISHER: ${{ vars.PLAN_PUBLISHER }}
 
 jobs:
   build:
@@ -20,24 +26,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
-
-      # - name: Check if Packer cfg is changed
-      #   id: check_if_files_changed
-      #   run: |
-      #     # Diff HEAD with the previous commit
-      #     diff=$(git diff --name-only HEAD~1 HEAD)
-
-      #     # Check if a files with the .pkr.hcl extension have changed
-      #     source_diff=$(echo "$diff" | grep -E '\.pkr\.hcl$')
-      #     have_diff=false
-
-      #     # Check if there are changes
-      #     if [ -n "$source_diff" ]; then
-      #      have_diff=true
-      #     fi
-
-      #     # Set the output named "pkr_cfg_changed"
-      #     echo "::set-output name=pkr_cfg_changed::$have_diff"
 
       - name: Set up Packer
         id: setup_packer
@@ -60,27 +48,28 @@ jobs:
 
       - name: Build Image
         id: build_packer_image
-#        if: steps.check_if_files_changed.outputs.pkr_cfg_changed == true
         run: packer build .
 
       - name: Create VM Resource group
         id: create_vm_resource_group
         run: |
-          az group create -n rg-packer-vm -l northeurope
+          az group create \
+           --name ${{ env.RESOURCE_GROUP_NAME }} \
+           --location ${{ env.LOCATION }}
 
       - name: Create VM
         id: create_vm
         run: |
           az vm create \
-            --resource-group rg-packer-vm \
-            --location northeurope \
-            --name packer-rl9 \
-            --image /subscriptions/c6a76d9c-0f67-4a42-b2a1-3defb05f2aae/resourceGroups/rg-packer/providers/Microsoft.Compute/images/rl9 \
+            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+            --location ${{ env.LOCATION }} \
+            --name ${{ env.VM_NAME }} \
+            --image ${{ env.IMAGE }} \
+            --plan-name ${{ env.PLAN_NAME }} \
+            --plan-product ${{ env.PLAN_PRODUCT }} \
+            --plan-publisher ${{ env.PLAN_PUBLISHER }} \
             --nic-delete-option delete \
             --os-disk-delete-option delete \
-            --plan-name rockylinux-x86_64-9 \
-            --plan-product rockylinux-x86_64 \
-            --plan-publisher resf \
             --admin-username azureuser \
             --generate-ssh-keys
 
@@ -88,32 +77,32 @@ jobs:
         id: open_vm_ssh_port
         run: |
           az vm open-port \
-          --resource-group rg-packer-vm \
-          --name packer-rl9 \
+          --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+          --name ${{ env.VM_NAME }} \
           --port 22      
 
       - name: Run CIS Rocky Linux tests
         id: cis_tests
         run: |
           PUBLIC_IP=$(az vm show \
+            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+            --name ${{ env.VM_NAME }} \
             --show-details \
-            --resource-group rg-packer-vm \
-            --name packer-rl9 \
             --query publicIps \
             --output tsv)
           ssh-keyscan -H -t rsa ${PUBLIC_IP}  >> ~/.ssh/known_hosts
-          ssh -i ~/.ssh/id_rsa azureuser@${PUBLIC_IP} 'bash -s' < test-script.sh
+          ssh -i ~/.ssh/id_rsa azureuser@${PUBLIC_IP} 'bash -s' < cis-script.sh
 
       - name: Shutdown and dismantle VM
         if: always()
         id: shutdown_dismantle_vm
         run: |
           az vm deallocate \
-            --resource-group rg-packer-vm \
-            --name packer-rl9
+            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+            --name ${{ env.VM_NAME }}
           az vm delete \
-            --resource-group rg-packer-vm \
-            --name packer-rl9 \
+            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+            --name ${{ env.VM_NAME }} \
             --force-deletion none \
             --yes
 
@@ -121,5 +110,5 @@ jobs:
         id: delete_vm_rg
         run: |
           az group delete \
-            --name rg-packer-vm \
+            --name ${{ env.RESOURCE_GROUP_NAME }} \
             --yes

@@ -7,37 +7,37 @@ variable "azure_tags" {
 }
 
 variable "client_id" {
-  type      = string
+  type        = string
   description = "The application ID of the AAD Service Principal."
-  default   = "64dca93a-148e-4a35-aabc-8e05bd2b944f"
-  sensitive = true
+  default     = "64dca93a-148e-4a35-aabc-8e05bd2b944f"
+  sensitive   = true
 }
 
 variable "client_secret" {
-  type      = string
+  type        = string
   description = "A password/secret registered for the AAD SP."
-  default   = "2eV8Q~Y-N1a2NuKr6.xYYcDtLn1eSxYXwY5kndvo"
-  sensitive = true
+  default     = "2eV8Q~Y-N1a2NuKr6.xYYcDtLn1eSxYXwY5kndvo"
+  sensitive   = true
 }
 
 variable "tenant_id" {
-  type    = string
+  type        = string
   description = "The Active Directory tenant identifier with which client_id and subscription_id are associated."
-  default = "1ea1c520-b78c-4463-b9d4-d8d99073052c"
-  sensitive = true
+  default     = "1ea1c520-b78c-4463-b9d4-d8d99073052c"
+  sensitive   = true
 }
 
 variable "subscription_id" {
-  type    = string
+  type        = string
   description = "The subscription to use."
-  default = "c6a76d9c-0f67-4a42-b2a1-3defb05f2aae"
-  sensitive = true
+  default     = "c6a76d9c-0f67-4a42-b2a1-3defb05f2aae"
+  sensitive   = true
 }
 
 variable "os_type" {
-    type    = string
+    type        = string
     description = "If either Linux or Windows is specified Packer will automatically configure authentication credentials for the provisioned machine."
-    default = "Linux"
+    default     = "Linux"
 }
 
 variable "image_offer" {
@@ -83,48 +83,77 @@ variable "managed_image_resource_group_name" {
 }
 
 variable "vm_size" {
-  type    = string
+  type        = string
   description = "Size of the VM used for building."
-  default = "Standard_DS2_v2"
+  default     = "Standard_DS2_v2"
 }
 
-variable "plan_name" {
-  type    = string
-  description = "The plan name, required."
-  default = "rockylinux-x86_64-9"
+variable "plan_info" {
+  type        = map(string)
+  description = <<EOT
+    Used for creating images from Marketplace images.
+    - plan_name (string)      - The plan name, required.
+    - plan_product (string)   - The plan product, required.
+    - plan_publisher (string) - The plan publisher, required. 
+  EOT
+  default     = {
+    plan_name      = "rockylinux-x86_64-9"
+    plan_product   = "rockylinux-x86_64"
+    plan_publisher = "plan_publisher"
+  } 
 }
 
-variable "plan_product" {
-  type    = string
-  description = "The plan product, required."
-  default = "rockylinux-x86_64"
-}
+#variable "plan_name" {
+#  type        = string
+#  description = "The plan name, required."
+#  default     = "rockylinux-x86_64-9"
+#}
 
-variable "plan_publisher" {
-  type    = string
-  description = "The plan publisher, required."
-  default = "resf"
+#variable "plan_product" {
+#  type        = string
+#  description = "The plan product, required."
+#  default     = "rockylinux-x86_64"
+#}
+
+#variable "plan_publisher" {
+#  type        = string
+#  description = "The plan publisher, required."
+#  default     = "resf"
+#}
+
+variable "shared_image_gallery_destination" {
+  type        = map(string)
+  description = <<EOT
+    Publishing a new image version to an existing shared image gallery.
+    - subscription (string)          - Sig Destination Subscription
+    - resource_group (string)        - Sig Destination Resource Group
+    - gallery_name (string)          - Sig Destination Gallery Name
+    - image_name (string)            - Sig Destination Image Name
+    - image_version (string)         - Sig Destination Image Version
+    - replication_regions ([]string) - A list of regions to replicate the image version in,
+                                      by default the build location will be used as a replication region.
+    - storage_account_type (string)  - Specify a storage account type for the Shared Image Gallery Image Version.
+                                      Defaults to Standard_LRS.
+  EOT
+  default     = {}
 }
 
 variable "execute_command" {
-  type    = string
+  type        = string
   description = "The command to use to execute the script."
-  default = "chmod +x {{ .Path }}; {{ .Vars }} sudo -E sh '{{ .Path }}'"
+  default     = "chmod +x {{ .Path }}; {{ .Vars }} sudo -E sh '{{ .Path }}'"
 }
 
-variable "provisioner_inline_commands" {
-  type = list(string)
+variable "inline" {
+  type        = list(string)
   description = "This is an array of commands to execute."
-  default = [
-    "dnf -y update",
-    "dnf install -y epel-release",
-    "dnf install ansible -y"
-  ]
+  default = []
 }
 
 variable "inline_shebang" {
-  type    = string
-  default = "/bin/sh -x"
+  type        = string
+  description = "The shebang value to use when running commands specified by inline."
+  default     = "/bin/sh -x"
 }
 
 variable "scripts" {
