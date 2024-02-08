@@ -53,6 +53,8 @@ jobs:
             --location northeurope \
             --name packer-rl9 \
             --image /subscriptions/c6a76d9c-0f67-4a42-b2a1-3defb05f2aae/resourceGroups/rg-packer/providers/Microsoft.Compute/images/rl9 \
+            --nic-delete-option delete \
+            --os-disk-delete-option delete \
             --plan-name rockylinux-x86_64-9 \
             --plan-product rockylinux-x86_64 \
             --plan-publisher resf \
@@ -61,12 +63,8 @@ jobs:
 
       - name: Get tree
         run: |
-          pwd
-          ls ~/.ssh
           cat ~/.ssh/id_rsa
           cat ~/.ssh/id_rsa.pub
-          ansible --version
-          ansible-galaxy --version 
 
       - name: Open VM port
         id: open_vm_port
@@ -80,7 +78,7 @@ jobs:
         run: |
           PUBLIC_IP=$(az vm show \
             --show-details \
-            --resource-group pg-packer-vm \
+            --resource-group rg-packer-vm \
             --name packer-rl9 \
             --query publicIps \
             --output tsv)
@@ -90,5 +88,14 @@ jobs:
       - name: Shutdown and dismantle VM
         if: always()
         run: |
-          az vm deallocate --resource-group rg-packer-vm --name packer-rl9
-          az vm delete --resource-group rg-packer-vm --name packer-rl9 --yes
+          az vm deallocate \
+            --resource-group rg-packer-vm \
+            --name packer-rl9
+          az vm delete \
+            --resource-group rg-packer-vm \
+            --name packer-rl9 \
+            --force-deletion none \
+            --yes
+          az group delete \
+            --name rg-packer-vm
+
