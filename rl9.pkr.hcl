@@ -13,9 +13,9 @@ source "azure-arm" "this" {
   managed_image_resource_group_name = var.managed_image_resource_group_name
   vm_size                           = var.vm_size
   plan_info {
-    plan_name      = var.
-    plan_product   = var.
-    plan_publisher = var.
+    plan_name      = var.plan_name
+    plan_product   = var.plan_info
+    plan_publisher = var.plan_publisher
   }
 }
 

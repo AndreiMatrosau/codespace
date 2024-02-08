@@ -21,22 +21,12 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Set up Packer
-        id: setup_packer
-        uses: hashicorp/setup-packer@main
-        with:
-          version: ${{ env.PRODUCT_VERSION }}
-
-      - name: Login to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
       - name: Check if Packer cfg is changed
-        id: check_file_changed
+        id: check_if_files_changed
         run: |
           # Diff HEAD with the previous commit
           diff=$(git diff --name-only HEAD~1 HEAD)
+          echo $diff
 
           # Check if a files with the .pkr.hcl extension have changed
           source_diff=$(echo "$diff" | grep -E '\.pkr.hcl$')
@@ -47,6 +37,17 @@ jobs:
 
           # Set the output named "pkr_cfg_changed"
           echo "::set-output name=pkr_cfg_changed::$have_diff"
+
+      - name: Set up Packer
+        id: setup_packer
+        uses: hashicorp/setup-packer@main
+        with:
+          version: ${{ env.PRODUCT_VERSION }}
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Run `packer init`
         id: init_packer
