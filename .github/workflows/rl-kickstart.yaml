@@ -34,7 +34,7 @@ jobs:
         id: chack_file_changed
         run: |
           # Diff HEAD with the previous commit
-          diff=$(git diff --name-only HEAD^ HEAD)
+          diff=$(git diff --name-only HEAD~1 HEAD)
 
           # Check if a files with the .pkr.hcl extension have changed
           source_diff=$(echo "$diff" | grep -E '\.pkr.hcl$')
