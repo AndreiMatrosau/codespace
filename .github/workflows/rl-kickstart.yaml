@@ -65,7 +65,7 @@ jobs:
 
       - name: Build Image
         id: build_packer_image
-        if: steps.chack_file_changed.outputs.pkr_cfg_changed == true
+        if: steps.check_if_files_changed.outputs.pkr_cfg_changed == true
         run: packer build ./rl9.pkr.hcl
 
       - name: Create VM Resource group
