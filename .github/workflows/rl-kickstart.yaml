@@ -61,20 +61,21 @@ jobs:
 
       - name: Get tree
         run: |
+          pwd
           ls ~/.ssh
 
-      # - name: Open VM port
-      #   id: open_vm_port
-      #   run: |
-      #     az vm open-port \
-      #     --resource-group pg-packer-vm \
-      #     --name packer-rl9 \
-      #     --port 22
+      - name: Open VM port
+        id: open_vm_port
+        run: |
+          az vm open-port \
+          --resource-group pg-packer-vm \
+          --name packer-rl9 \
+          --port 22
 
-      # - name: Run tests
-      #   run: ssh -i /home/azureuser/.ssh/id_rsa azureuser@packer-rl9 'bash -s' < test-script.sh
+      - name: Run tests
+        run: ssh -i ~/.ssh/id_rsa azureuser@packer-rl9 'bash -s' < test-script.sh
 
       - name: Shutdown and dismantle VM
         run: |
-          az vm deallocate --resource-group myResourceGroup --name packer-rl9
-          az vm delete --resource-group myResourceGroup --name packer-rl9 --yes
+          az vm deallocate --resource-group pg-packer-vm --name packer-rl9
+          az vm delete --resource-group pg-packer-vm --name packer-rl9 --yes
