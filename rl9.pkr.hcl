@@ -12,7 +12,7 @@ source "azure-arm" "this" {
   location                          = "${var.location}"
   vm_size                           = "${var.vm_size}"
   
-  azure_tags                        = ${var.azure_tags}"
+  azure_tags                        = "${var.azure_tags}"
 
   managed_image_name                = "${var.managed_image_name}"
   managed_image_resource_group_name = "${var.managed_image_resource_group_name}"
