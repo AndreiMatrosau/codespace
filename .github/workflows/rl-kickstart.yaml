@@ -13,6 +13,7 @@ env:
   LOCATION: ${{ vars.LOCATION }}
   VM_NAME: ${{ vars.VM_NAME }}
   IMAGE: ${{ vars.IMAGE }}
+  PLAN_NAME: ${{ vars.PLAN_NAME }}
   PLAN_PRODUCT: ${{ vars.PLAN_PRODUCT }}
   PLAN_PUBLISHER: ${{ vars.PLAN_PUBLISHER }}
 
@@ -94,7 +95,6 @@ jobs:
           ssh -i ~/.ssh/id_rsa azureuser@${PUBLIC_IP} 'bash -s' < cis-script.sh
 
       - name: Shutdown and dismantle VM
-        if: always()
         id: shutdown_dismantle_vm
         run: |
           az vm deallocate \
@@ -108,6 +108,7 @@ jobs:
 
       - name: Delete VM Resource group
         id: delete_vm_rg
+        if: always()
         run: |
           az group delete \
             --name ${{ env.RESOURCE_GROUP_NAME }} \
