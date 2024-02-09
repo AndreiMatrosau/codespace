@@ -91,11 +91,16 @@ jobs:
       - name: Create VM
         id: create_vm
         run: |
+          echo $(az sig image-definition list \
+            --resource-group ${{ env.COMPUTE_GALLERY_RESOURCE_GROUP_NAME }} \
+            --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
+            --query "[].[id]" \
+            --output tsv)
           IMAGE_ID=$(az sig image-definition list \
-             --resource-group ${{ env.COMPUTE_GALLERY_RESOURCE_GROUP_NAME }} \
-             --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
-             --query "[].[id]" \
-             --output tsv)
+            --resource-group ${{ env.COMPUTE_GALLERY_RESOURCE_GROUP_NAME }} \
+            --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
+            --query "[].[id]" \
+            --output tsv)
           echo ${IMAGE_ID}
           az vm create \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
