@@ -92,7 +92,6 @@ jobs:
             --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
             --query "[].[id]" \
             --output tsv)
-          echo ${IMAGE_ID}
           az vm create \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
             --location ${{ env.LOCATION }} \

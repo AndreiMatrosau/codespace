@@ -9,28 +9,24 @@ variable "azure_tags" {
 variable "client_id" {
   type        = string
   description = "The application ID of the AAD Service Principal."
-  default     = "64dca93a-148e-4a35-aabc-8e05bd2b944f"
   sensitive   = true
 }
 
 variable "client_secret" {
   type        = string
   description = "A password/secret registered for the AAD SP."
-  default     = "2eV8Q~Y-N1a2NuKr6.xYYcDtLn1eSxYXwY5kndvo"
   sensitive   = true
 }
 
 variable "tenant_id" {
   type        = string
   description = "The Active Directory tenant identifier with which client_id and subscription_id are associated."
-  default     = "1ea1c520-b78c-4463-b9d4-d8d99073052c"
   sensitive   = true
 }
 
 variable "subscription_id" {
   type        = string
   description = "The subscription to use."
-  default     = "c6a76d9c-0f67-4a42-b2a1-3defb05f2aae"
   sensitive   = true
 }
 
@@ -73,13 +69,11 @@ variable "temp_resource_group_name" {
 variable "managed_image_name" {
   type        = string
   description = "Specify the managed image name where the result of the Packer build will be saved."
-  default     = "rl9-X86_64"
 }
 
 variable "managed_image_resource_group_name" {
   type        = string
   description = "Specify the managed image resource group name where the result of the Packer build will be saved."
-  default     = "rg-packer"
 }
 
 variable "vm_size" {
@@ -125,19 +119,19 @@ variable "shared_image_gallery_destination" {
     - image_name (string)            - Sig Destination Image Name
     - image_version (string)         - Sig Destination Image Version
     - replication_regions ([]string) - A list of regions to replicate the image version in,
-                                      by default the build location will be used as a replication region.
+                                       by default the build location will be used as a replication region.
     - storage_account_type (string)  - Specify a storage account type for the Shared Image Gallery Image Version.
-                                      Defaults to Standard_LRS.
+                                       Defaults to Standard_LRS.
   EOT
 }
 
 variable "provisioner_shell" {
   type = object({
-    scripts         = list(string)
+    scripts = list(string)
   })
   description = <<EOT
     Provisions machines built by Packer using shell scripts.
-    - scripts (list(string))   - An array of scripts to execute.
+    - scripts (list(string)) - An array of scripts to execute.
   EOT
   default = {
     scripts = []
