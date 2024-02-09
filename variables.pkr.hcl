@@ -73,7 +73,7 @@ variable "temp_resource_group_name" {
 variable "managed_image_name" {
   type        = string
   description = "Specify the managed image name where the result of the Packer build will be saved."
-  default     = "rl9"
+  default     = "rl9-X86_64"
 }
 
 variable "managed_image_resource_group_name" {
