@@ -128,8 +128,8 @@ variable "provisioner_shell" {
     Provisions machines built by Packer using shell scripts.
     - scripts (list(string))   - An array of scripts to execute.
   EOT
-  default     = {
-    scripts         = []
+  default = {
+    scripts = []
   }  
 }
 
