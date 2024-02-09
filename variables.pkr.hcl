@@ -122,7 +122,6 @@ variable "shared_image_gallery_destination" {
 
 variable "provisioner_shell" {
   type        = map(object({
-    execute_command = string
     scripts         = list(string)
   }))
   description = <<EOT
