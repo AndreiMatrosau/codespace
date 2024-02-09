@@ -127,11 +127,9 @@ variable "provisioner_shell" {
   }))
   description = <<EOT
     Provisions machines built by Packer using shell scripts.
-    - execute_command (string) - The command to use to execute the script.
     - scripts (list(string))   - An array of scripts to execute.
   EOT
   default     = {
-    execute_command = "chmod +x {{.Path}}; . {{.EnvVarFile}} && {{.Path}}"
     scripts         = []
   }  
 }
