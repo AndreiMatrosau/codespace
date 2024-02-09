@@ -39,8 +39,6 @@ build {
 
   provisioner "shell" {
     execute_command = var.execute_command
-#    inline          = var.inline
-#    inline_shebang  = var.inline_shebang
     scripts         = var.scripts
   }
 }

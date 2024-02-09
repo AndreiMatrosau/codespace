@@ -103,24 +103,6 @@ variable "plan_info" {
   } 
 }
 
-#variable "plan_name" {
-#  type        = string
-#  description = "The plan name, required."
-#  default     = "rockylinux-x86_64-9"
-#}
-
-#variable "plan_product" {
-#  type        = string
-#  description = "The plan product, required."
-#  default     = "rockylinux-x86_64"
-#}
-
-#variable "plan_publisher" {
-#  type        = string
-#  description = "The plan publisher, required."
-#  default     = "resf"
-#}
-
 variable "shared_image_gallery_destination" {
   type        = map(string)
   description = <<EOT
@@ -138,22 +120,23 @@ variable "shared_image_gallery_destination" {
   default     = {}
 }
 
+variable "provisioner_shell" {
+  type        = map(object)
+  description = <<EOT
+    Provisions machines built by Packer using shell scripts.
+    - execute_command (string) - The command to use to execute the script.
+    - scripts (list(string))   - An array of scripts to execute.
+  EOT
+  default     = {
+    execute_command = "chmod +x {{.Path}}; . {{.EnvVarFile}} && {{.Path}}"
+    scripts         = []
+  }  
+}
+
 variable "execute_command" {
   type        = string
   description = "The command to use to execute the script."
   default     = "chmod +x {{ .Path }}; {{ .Vars }} sudo -E sh '{{ .Path }}'"
-}
-
-variable "inline" {
-  type        = list(string)
-  description = "This is an array of commands to execute."
-  default = []
-}
-
-variable "inline_shebang" {
-  type        = string
-  description = "The shebang value to use when running commands specified by inline."
-  default     = "/bin/sh -x"
 }
 
 variable "scripts" {
