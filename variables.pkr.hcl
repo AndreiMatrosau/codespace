@@ -109,7 +109,7 @@ variable "plan_info" {
 
 variable "shared_image_gallery_destination" {
   type = object({
-    subscription         = string
+  #  subscription         = string
     resource_group       = string
     gallery_name         = string
     image_name           = string
@@ -119,7 +119,7 @@ variable "shared_image_gallery_destination" {
   })
   description = <<EOT
     Publishing a new image version to an existing shared image gallery.
-    - subscription (string)          - Sig Destination Subscription
+  #  - subscription (string)          - Sig Destination Subscription
     - resource_group (string)        - Sig Destination Resource Group
     - gallery_name (string)          - Sig Destination Gallery Name
     - image_name (string)            - Sig Destination Image Name
