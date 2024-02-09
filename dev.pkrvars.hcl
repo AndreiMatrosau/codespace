@@ -4,7 +4,7 @@ shared_image_gallery_destination = {
     resource_group       = "rg-packer"
     gallery_name         = "sig.packer"
     image_name           = "rl9-X86_64"
-    image_version        = "1.2.0"
+    image_version        = "1.3.0"
     replication_regions  = ["North Europe"]
     storage_account_type = "Standard_LRS"
 }

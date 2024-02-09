@@ -17,6 +17,7 @@ env:
   PLAN_PUBLISHER: ${{ vars.PLAN_PUBLISHER }}
   COMPUTE_GALLERY_NAME: ${{ vars.COMPUTE_GALLERY_NAME }}
   COMPUTE_GALLERY_RESOURCE_GROUP_NAME: ${{ vars.COMPUTE_GALLERY_RESOURCE_GROUP_NAME }}
+  VM_ADMIN_USER_NAME: ${{ vars.VM_ADMIN_USER_NAME }}
 
 jobs:
   build_packer_image:
@@ -95,17 +96,18 @@ jobs:
              --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
              --query "[].[id]" \
              --output tsv)
+          echo ${IMAGE_ID}
           az vm create \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
             --location ${{ env.LOCATION }} \
             --name ${{ env.VM_NAME }} \
-            --image ${IMAGE_ID} \   
+            --image "${IMAGE_ID}" \   
             --plan-name ${{ env.PLAN_NAME }} \
             --plan-product ${{ env.PLAN_PRODUCT }} \
             --plan-publisher ${{ env.PLAN_PUBLISHER }} \
             --nic-delete-option delete \
             --os-disk-delete-option delete \
-            --admin-username azureuser \
+            --admin-username ${{ vars.VM_ADMIN_USER_NAME }} \
             --generate-ssh-keys
 
       - name: Open VM SSH port
@@ -126,7 +128,7 @@ jobs:
             --query publicIps \
             --output tsv)
           ssh-keyscan -H -t rsa ${PUBLIC_IP}  >> ~/.ssh/known_hosts
-          ssh -i ~/.ssh/id_rsa azureuser@${PUBLIC_IP} 'bash -s' < cis-script.sh
+          ssh -i ~/.ssh/id_rsa ${{ vars.VM_ADMIN_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
 
       - name: Shutdown and dismantle VM
         id: shutdown_dismantle_vm
