@@ -18,7 +18,7 @@ env:
   PLAN_PUBLISHER: ${{ vars.PLAN_PUBLISHER }}
 
 jobs:
-  build:
+  build_packer_image:
     runs-on: ubuntu-latest
 
     steps:
@@ -62,12 +62,28 @@ jobs:
                        -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
                        -force .
 
+
+  run_vm_custom_image:
+    runs-on: ubuntu-latest
+
+    steps: 
+      - name: Checkout Repository
+        id: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: Create VM Resource group
         id: create_vm_resource_group
         run: |
           az group create \
-           --name ${{ env.RESOURCE_GROUP_NAME }} \
-           --location ${{ env.LOCATION }}
+          --name ${{ env.RESOURCE_GROUP_NAME }} \
+          --location ${{ env.LOCATION }}
 
       - name: Create VM
         id: create_vm

@@ -24,14 +24,23 @@ source "azure-arm" "this" {
     plan_publisher = var.plan_info.plan_publisher
   }
 
-#  shared_image_gallery_destination {
-#    subscription        = var.shared_image_gallery_destination.subscription
-#    resource_group      = var.shared_image_gallery_destination.resource_group
-#    gallery_name        = var.shared_image_gallery_destination.gallery_name
-#    image_name          = var.shared_image_gallery_destination.image_name
-#    image_version       = var.shared_image_gallery_destination.image_version
-#    replication_regions = var.shared_image_gallery_destination.replication_regions
-#  }
+        - name: Checkout Repository
+        id: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }} {
+    subscription        = var.shared_image_gallery_destination.subscription
+    resource_group      = var.shared_image_gallery_destination.resource_group
+    gallery_name        = var.shared_image_gallery_destination.gallery_name
+    image_name          = var.shared_image_gallery_destination.image_name
+    image_version       = var.shared_image_gallery_destination.image_version
+    replication_regions = var.shared_image_gallery_destination.replication_regions
+  }
 }
 
 build {
