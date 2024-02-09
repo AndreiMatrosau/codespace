@@ -12,10 +12,11 @@ env:
   RESOURCE_GROUP_NAME: ${{ vars.RESOURCE_GROUP_NAME }}
   LOCATION: ${{ vars.LOCATION }}
   VM_NAME: ${{ vars.VM_NAME }}
-  IMAGE: ${{ vars.IMAGE }}
   PLAN_NAME: ${{ vars.PLAN_NAME }}
   PLAN_PRODUCT: ${{ vars.PLAN_PRODUCT }}
   PLAN_PUBLISHER: ${{ vars.PLAN_PUBLISHER }}
+  COMPUTE_GALLERY_NAME: ${{ vars.COMPUTE_GALLERY_NAME }}
+  COMPUTE_GALLERY_RESOURCE_GROUP_NAME: ${{ vars.COMPUTE_GALLERY_RESOURCE_GROUP_NAME }}
 
 jobs:
   build_packer_image:
@@ -89,11 +90,16 @@ jobs:
       - name: Create VM
         id: create_vm
         run: |
+          IMAGE_ID=$(az sig image-definition list \
+             --resource-group ${{ env.COMPUTE_GALLERY_RESOURCE_GROUP_NAME }} \
+             --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
+             --query "[].[id]" \
+             --output tsv)
           az vm create \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
             --location ${{ env.LOCATION }} \
             --name ${{ env.VM_NAME }} \
-            --image ${{ env.IMAGE }} \
+            --image ${IMAGE_ID} \   
             --plan-name ${{ env.PLAN_NAME }} \
             --plan-product ${{ env.PLAN_PRODUCT }} \
             --plan-publisher ${{ env.PLAN_PUBLISHER }} \
