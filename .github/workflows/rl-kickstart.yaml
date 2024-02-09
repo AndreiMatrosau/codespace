@@ -27,8 +27,6 @@ jobs:
       - name: Checkout Repository
         id: checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
 
       - name: Login to Azure
         uses: azure/login@v1
@@ -73,8 +71,6 @@ jobs:
       - name: Checkout Repository
         id: checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
 
       - name: Login to Azure
         uses: azure/login@v1
@@ -91,11 +87,6 @@ jobs:
       - name: Create VM
         id: create_vm
         run: |
-          echo $(az sig image-definition list \
-            --resource-group ${{ env.COMPUTE_GALLERY_RESOURCE_GROUP_NAME }} \
-            --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
-            --query "[].[id]" \
-            --output tsv)
           IMAGE_ID=$(az sig image-definition list \
             --resource-group ${{ env.COMPUTE_GALLERY_RESOURCE_GROUP_NAME }} \
             --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
@@ -106,7 +97,7 @@ jobs:
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
             --location ${{ env.LOCATION }} \
             --name ${{ env.VM_NAME }} \
-            --image "${IMAGE_ID}" \   
+            --image ${IMAGE_ID} \
             --plan-name ${{ env.PLAN_NAME }} \
             --plan-product ${{ env.PLAN_PRODUCT }} \
             --plan-publisher ${{ env.PLAN_PUBLISHER }} \
