@@ -28,7 +28,7 @@ source "azure-arm" "this" {
     subscription        = var.shared_image_gallery_destination.subscription
     resource_group      = var.shared_image_gallery_destination.resource_group
     gallery_name        = var.shared_image_gallery_destination.gallery_name
-    image_name          = var.shared_image_gallery_destination.image_name
+    image_name          = var.managed_image_name
     image_version       = var.shared_image_gallery_destination.image_version
     replication_regions = var.shared_image_gallery_destination.replication_regions
   }
