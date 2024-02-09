@@ -89,14 +89,18 @@ variable "vm_size" {
 }
 
 variable "plan_info" {
-  type        = map(string)
+  type = object({
+    plan_name      = string
+    plan_product   = string
+    plan_publisher = string
+  })
   description = <<EOT
     Used for creating images from Marketplace images.
     - plan_name (string)      - The plan name, required.
     - plan_product (string)   - The plan product, required.
     - plan_publisher (string) - The plan publisher, required. 
   EOT
-  default     = {
+  default = {
     plan_name      = "rockylinux-x86_64-9"
     plan_product   = "rockylinux-x86_64"
     plan_publisher = "resf"
@@ -104,7 +108,15 @@ variable "plan_info" {
 }
 
 variable "shared_image_gallery_destination" {
-  type        = map(string)
+  type = object({
+    subscription         = string
+    resource_group       = string
+    gallery_name         = string
+    image_name           = string
+    image_version        = string
+    replication_regions  = list(string)
+    storage_account_type = string
+  })
   description = <<EOT
     Publishing a new image version to an existing shared image gallery.
     - subscription (string)          - Sig Destination Subscription
@@ -117,11 +129,11 @@ variable "shared_image_gallery_destination" {
     - storage_account_type (string)  - Specify a storage account type for the Shared Image Gallery Image Version.
                                       Defaults to Standard_LRS.
   EOT
-  default     = {}
+  default = {}
 }
 
 variable "provisioner_shell" {
-  type        = object({
+  type = object({
     scripts         = list(string)
   })
   description = <<EOT
