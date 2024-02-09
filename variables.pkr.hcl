@@ -112,7 +112,7 @@ variable "shared_image_gallery_destination" {
     subscription         = string
     resource_group       = string
     gallery_name         = string
-    image_name           = string
+#    image_name           = string
     image_version        = string
     replication_regions  = list(string)
     storage_account_type = string
