@@ -129,7 +129,7 @@ variable "shared_image_gallery_destination" {
     - storage_account_type (string)  - Specify a storage account type for the Shared Image Gallery Image Version.
                                       Defaults to Standard_LRS.
   EOT
-  default = {}
+  default = ()
 }
 
 variable "provisioner_shell" {
