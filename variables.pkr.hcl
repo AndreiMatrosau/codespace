@@ -121,9 +121,9 @@ variable "shared_image_gallery_destination" {
 }
 
 variable "provisioner_shell" {
-  type        = map(object({
+  type        = object({
     scripts         = list(string)
-  }))
+  })
   description = <<EOT
     Provisions machines built by Packer using shell scripts.
     - scripts (list(string))   - An array of scripts to execute.
