@@ -45,16 +45,21 @@ jobs:
 
       - name: Run `packer validate`
         id: validate_packer
-        run: packer validate -var-file="dev.pkrvars.hcl" -var "client_id=${{ secrets.AZURE_CLIENT_ID }}" -var "client_secret=${{ secrets.AZURE_CLIENT_SECRET }}" -var "tenant_id=${{ secrets.AZURE_TENANT_ID }}" -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" .
-
-      - name: Build Image
-        id: build_packer_image
-        run: packer build -var-file="dev.pkrvars.hcl" \
+        run: |
+          packer validate -var-file="dev.pkrvars.hcl" \
                           -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
                           -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
                           -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
-                          -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
-                          .
+                          -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' .
+
+      - name: Build Image
+        id: build_packer_image
+        run: |
+          packer build -var-file="dev.pkrvars.hcl" \
+                       -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
+                       -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
+                       -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
+                       -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' .
 
       - name: Create VM Resource group
         id: create_vm_resource_group
