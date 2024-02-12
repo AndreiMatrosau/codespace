@@ -10,8 +10,18 @@ grep -E '^\s*SELINUXTYPE=(targeted|mls)\b' /etc/selinux/config
 echo "Ensure permissions on /etc/ssh/sshd_config are configured"
 stat -Lc "%n %a %u/%U %g/%G" /etc/ssh/sshd_config
 echo "------------------------------------------"
-ls /usr/lib/systemd/system | grep systemd
+cat /usr/lib/systemd/system/systemd-firstboot.service
 echo "----------------"
 cat /etc/os-release
 echo "----------------"
 cat /var/log/cloud-init-output.log
+echo "----------------"
+pvdisplay /dev/sda2
+echo "----------------"
+vgdisplay vg_gebos
+echo "----------------"
+lvdisplay /dev/vg_gebos/swap
+echo "----------------"
+cat /etc/ssh/ssh_host_rsa_key
+echo "----------------"
+cat /etc/ssh/ssh_host_rsa_key.pub
