@@ -14,13 +14,15 @@ cat /usr/lib/systemd/system/systemd-firstboot.service
 echo "----------------"
 cat /etc/os-release
 echo "----------------"
-cat /var/log/cloud-init-output.log
+cat /var/log/cloud-init-output.log  
 echo "----------------"
-pvdisplay /dev/sda2
+pvdisplay
 echo "----------------"
-vgdisplay vg_gebos
+vgdisplay
 echo "----------------"
-lvdisplay /dev/vg_gebos/swap
+lvdisplay
+echo "----------------"
+sestatus
 echo "----------------"
 cat /etc/ssh/ssh_host_rsa_key
 echo "----------------"
