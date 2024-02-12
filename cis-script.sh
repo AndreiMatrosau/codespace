@@ -9,3 +9,9 @@ echo "Ensure SELinux policy is configured"
 grep -E '^\s*SELINUXTYPE=(targeted|mls)\b' /etc/selinux/config
 echo "Ensure permissions on /etc/ssh/sshd_config are configured"
 stat -Lc "%n %a %u/%U %g/%G" /etc/ssh/sshd_config
+echo "------------------------------------------"
+ls /usr/lib/systemd/system | grep systemd
+echo "----------------"
+cat /etc/os-release
+echo "----------------"
+cat /var/log/cloud-init-output.log

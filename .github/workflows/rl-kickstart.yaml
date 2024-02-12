@@ -127,26 +127,17 @@ jobs:
           --name ${{ env.VM_NAME }} \
           --port 22
 
-      - name: Checking Cloud init
-        id: checking_cloud_init
+      - name: Run CIS Rocky Linux tests
+        id: cis_tests
         run: |
-          ls /usr/lib/systemd/system
-          echo "----------------"
-          cat /etc/os-release
-          echo "----------------"
-          cat /var/log/cloud-init-output.log
-
-      # - name: Run CIS Rocky Linux tests
-      #   id: cis_tests
-      #   run: |
-      #     PUBLIC_IP=$(az vm show \
-      #       --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-      #       --name ${{ env.VM_NAME }} \
-      #       --show-details \
-      #       --query publicIps \
-      #       --output tsv)
-      #     ssh-keyscan -H -t rsa ${PUBLIC_IP}  >> ~/.ssh/known_hosts
-      #     ssh -i ~/.ssh/id_rsa ${{ vars.VM_ADMIN_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
+          PUBLIC_IP=$(az vm show \
+            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+            --name ${{ env.VM_NAME }} \
+            --show-details \
+            --query publicIps \
+            --output tsv)
+          ssh-keyscan -H -t rsa ${PUBLIC_IP}  >> ~/.ssh/known_hosts
+          ssh -i ~/.ssh/id_rsa ${{ vars.VM_ADMIN_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
 
       # - name: Shutdown and dismantle VM
       #   id: shutdown_dismantle_vm
@@ -168,4 +159,3 @@ jobs:
       #       --name ${{ env.RESOURCE_GROUP_NAME }} \
       #       --yes
 
-      
