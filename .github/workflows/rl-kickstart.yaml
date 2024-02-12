@@ -132,7 +132,7 @@ jobs:
         run: |
           ls /usr/lib/systemd/system
           echo "----------------"
-          cat /etc/os-releases
+          cat /etc/os-release
           echo "----------------"
           cat /var/log/cloud-init-output.log
 
