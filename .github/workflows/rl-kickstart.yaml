@@ -62,7 +62,6 @@ jobs:
                        -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
                        -force .
 
-
   run_vm_custom_image:
     runs-on: ubuntu-latest
     needs: [build_packer_image]
@@ -103,7 +102,8 @@ jobs:
             --nic-delete-option delete \
             --os-disk-delete-option delete \
             --admin-username ${{ vars.VM_ADMIN_USER_NAME }} \
-            --generate-ssh-keys
+            --generate-ssh-keys \
+            --custom-data cloud_init.txt
 
       - name: Open VM SSH port
         id: open_vm_ssh_port
@@ -111,7 +111,12 @@ jobs:
           az vm open-port \
           --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
           --name ${{ env.VM_NAME }} \
-          --port 22      
+          --port 22
+
+      - name: Checking Cloud init
+        id: checking_cloud_init
+        run: |
+          cat /etc/sysconfig/firstboot
 
       - name: Run CIS Rocky Linux tests
         id: cis_tests
