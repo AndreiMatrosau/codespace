@@ -32,6 +32,14 @@ source "azure-arm" "this" {
     image_version       = var.shared_image_gallery_destination.image_version
     replication_regions = var.shared_image_gallery_destination.replication_regions
   }
+
+  http_directory = "http"
+  http_content = {
+    "rl9_ks.cfg" = "./http/rl9_ks.cfg"
+  }
+  boot_command = [
+    "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/rl9_ks.cfg<enter>"
+  ]
 }
 
 build {
