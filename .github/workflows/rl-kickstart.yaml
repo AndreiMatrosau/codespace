@@ -116,7 +116,8 @@ jobs:
       - name: Checking Cloud init
         id: checking_cloud_init
         run: |
-          cat /etc/sysconfig/firstboot
+          cat /usr/lib/systemd/system/systemd-firstboot.service
+          less /var/log/messages
 
       - name: Run CIS Rocky Linux tests
         id: cis_tests

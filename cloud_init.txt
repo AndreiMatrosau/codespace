@@ -34,7 +34,7 @@ package_removals:
 runcmd:
   - |
     # Disable first boot
-    echo "RUN_FIRSTBOOT=NO" > /etc/sysconfig/firstboot
+    sed -i 's/ConditionFirstboot=yes/ConditionFirstboot=no/g' /usr/lib/systemd/system/systemd-firstboot.service
 
 #    parted /dev/sda --script mklabel gpt mkpart EFI fat32 1MiB 1024MiB mkpart primary ext4 1024MiB 2048MiB
 #    mkfs.fat -F32 /dev/sda1
