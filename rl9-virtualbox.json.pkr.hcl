@@ -8,6 +8,10 @@ packer {
       source  = "github.com/hashicorp/vmware"
       version = "~> 1"
     }
+    virtualbox = {
+      version = "~> 1"
+      source  = "github.com/hashicorp/virtualbox"
+    }
   }
 }
 
