@@ -74,7 +74,8 @@ jobs:
                        -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
                        -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
                        -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
-      #                  -force .
+                       -debug \
+                       -force .
 
   # run_vm_custom_image:
   #   runs-on: ubuntu-latest
