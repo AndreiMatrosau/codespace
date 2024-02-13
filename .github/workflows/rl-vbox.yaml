@@ -40,7 +40,7 @@ jobs:
 
       - name: Run `packer init`
         id: init_packer
-        run: packer init rl9-virtualbox.json.pkr.hcl variables.pkr.hcl
+        run: packer init .
 
       - name: Run `packer validate`
         id: validate_packer
