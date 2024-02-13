@@ -46,6 +46,18 @@ jobs:
 
       #     echo "::set-output name=docs_changed::$HasDiff"
 
+      - name: Install KVM virtualization
+        id: install_kvm
+        run: |
+          sudo dnf install qemu-kvm libvirt virt-manager virt-install
+          sudo dnf install epel-release -y
+          sudo dnf -y install bridge-utils virt-top libguestfs-tools bridge-utils virt-viewer
+          lsmod | grep kvm
+          sudo systemctl start libvirtd
+          sudo systemctl enable libvirtd
+          sudo usermod -aG libvirt $USER
+          newgrp libvirt
+
       - name: Set up Packer
         id: setup_packer
         # if: steps.check_file_changed.outputs.docs_changed == 'True'
