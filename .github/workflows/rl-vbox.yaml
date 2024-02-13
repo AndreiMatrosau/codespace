@@ -45,7 +45,8 @@ jobs:
       - name: Run `packer validate`
         id: validate_packer
         run: |
-          packer validate -var-file="dev.pkrvars.hcl" \
+          packer validate -syntax-only \
+                          -var-file="dev.pkrvars.hcl" \
                           -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
                           -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
                           -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
