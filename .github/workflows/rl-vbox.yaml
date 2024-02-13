@@ -54,7 +54,7 @@ jobs:
       - name: Build Image
         id: build_packer_image
         run: |
-          sudo apt install open-vm-tools -y
+          sudo apt-get install virtualbox -y
           sudo apt install open-vm-tools-desktop -y
           sudo apt update
           sudo apt upgrade -y
