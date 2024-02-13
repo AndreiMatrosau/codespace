@@ -50,14 +50,20 @@ jobs:
         id: install_kvm
         run: |
           egrep -c '(vmx|svm)' /proc/cpuinfo
+          sudo apt update
           sudo apt install cpu-checker -y
-          sudo apt install qemu-kvm virt-manager virtinst libvirt-clients bridge-utils libvirt-daemon-system -y
+          sudo apt install libvirt-daemon-system -y
+          sudo apt install qemu-kvm -y
+          sudo apt install virt-manager -y
+          sudo apt install virtinst -y
+          sudo apt install libvirt-clients -y
+          sudo apt install bridge-utils -y
           sudo systemctl enable --now libvirtd
           sudo systemctl start libvirt
           sudo systemctl status libvirtd
           sudo usermod -aG kvm $USER
           sudo usermod -aG libvirt $USER
-          
+
           # sudo apt install libpixman-1-dev libcairo2-dev libpango1.0-dev libjpeg8-dev libgif-dev ninja-build
           # sudo apt install qemu
           # dpkg --list | grep qemu
