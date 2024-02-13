@@ -8,7 +8,7 @@ source "qemu" "rl9" {
   output_directory  = "output-rocky_linux"
   shutdown_command  = "echo 'packer' | sudo -S shutdown -P now"
   disk_size         = "40000M"
-  memory            = "2048M"
+  memory            = "2048"
   format            = "qcow2"
   accelerator       = "kvm"
   http_directory    = "http"
