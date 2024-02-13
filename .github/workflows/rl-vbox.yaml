@@ -40,16 +40,16 @@ jobs:
 
       - name: Run `packer init`
         id: init_packer
-        run: "packer init ."
+        run: packer init rl9-virtualbox.json.pkr.hcl variables.pkr.hcl
 
-    #   - name: Run `packer validate`
-    #     id: validate_packer
-    #     run: |
-    #       packer validate -var-file="dev.pkrvars.hcl" \
-    #                       -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
-    #                       -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
-    #                       -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
-    #                       -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' rl9-virtualbox.json.pkr.hcl variables.pkr.hcl
+      - name: Run `packer validate`
+        id: validate_packer
+        run: |
+          packer validate -var-file="dev.pkrvars.hcl" \
+                          -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
+                          -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
+                          -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
+                          -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' rl9-virtualbox.json.pkr.hcl variables.pkr.hcl
 
       - name: Build Image
         id: build_packer_image
