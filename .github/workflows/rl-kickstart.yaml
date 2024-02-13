@@ -49,14 +49,19 @@ jobs:
       - name: Install KVM virtualization
         id: install_kvm
         run: |
-          sudo dnf install qemu-kvm libvirt virt-manager virt-install
-          sudo dnf install epel-release -y
-          sudo dnf -y install bridge-utils virt-top libguestfs-tools bridge-utils virt-viewer
-          lsmod | grep kvm
-          sudo systemctl start libvirtd
-          sudo systemctl enable libvirtd
+          egrep -c '(vmx|svm)' /proc/cpuinfo
+          sudo apt install cpu-checker -y
+          sudo apt install qemu-kvm virt-manager virtinst libvirt-clients bridge-utils libvirt-daemon-system -y
+          sudo systemctl enable --now libvirtd
+          sudo systemctl start libvirt
+          sudo systemctl status libvirtd
+          sudo usermod -aG kvm $USER
           sudo usermod -aG libvirt $USER
-          newgrp libvirt
+          
+          # sudo apt install libpixman-1-dev libcairo2-dev libpango1.0-dev libjpeg8-dev libgif-dev ninja-build
+          # sudo apt install qemu
+          # dpkg --list | grep qemu
+
 
       - name: Set up Packer
         id: setup_packer
