@@ -27,3 +27,12 @@ source "qemu" "rl9" {
 build {
   sources = ["source.qemu.rl9"]
 }
+
+packer {
+  required_plugins {
+    qemu = {
+      version = "~> 1"
+      source  = "github.com/hashicorp/qemu"
+    }
+  }
+}
