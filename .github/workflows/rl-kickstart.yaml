@@ -2,10 +2,6 @@ name: CIS tests with Packer Azure VM Image
 
 on:
   repository_dispatch:
-  push:
-    branches:
-      - main
-      - feature/ga_packer_vm_cis_test
 
 env:
   PRODUCT_VERSION: ${{ vars.PRODUCT_VERSION }}
