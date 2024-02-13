@@ -1,3 +1,7 @@
+locals {
+  version = formatdate("YYYY.MM.DD", timestamp())
+}
+
 packer {
   required_plugins {
     ansible = {
