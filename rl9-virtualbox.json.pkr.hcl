@@ -2,7 +2,7 @@ locals {
   version = formatdate("YYYY.MM.DD", timestamp())
 }
 
-data "sshkey" "packer" {}
+// data "sshkey" "packer" {}
 
 source "qemu" "rl9" {
   accelerator       = "kvm"
@@ -22,7 +22,7 @@ source "qemu" "rl9" {
   communicator         = "ssh"
   ssh_username         = "packer"
   ssh_password         = "s0m3password"
-  ssh_private_key_file = data.sshkey.packer.private_key_path
+  // ssh_private_key_file = data.sshkey.packer.private_key_path
   ssh_timeout          = "5m"
   vm_name              = "rockylinux9"
   net_device           = "virtio-net"
