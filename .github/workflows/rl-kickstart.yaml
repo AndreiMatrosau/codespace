@@ -50,11 +50,11 @@ jobs:
       - name: Install KVM virtualization
         id: install_kvm
         run: |
-          apt-get update
-          apt-get install kvm qemu-kvm libvirt-bin virtinst
-          apt install virt-manager 
-          adduser `id -un` libvirt
-          adduser `id -un` kvm
+          sudo apt-get update
+          sudo apt-get install kvm qemu-kvm libvirt-bin virtinst
+          sudo apt install virt-manager 
+          sudo adduser `id -un` libvirt
+          sudo adduser `id -un` kvm
           ls /etc/network
           # sudo apt update
           # sudo apt install cpu-checker -y
