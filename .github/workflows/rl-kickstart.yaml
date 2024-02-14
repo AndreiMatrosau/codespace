@@ -53,9 +53,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install qemu qemu-kvm libvirt-daemon-system -y
           sudo apt install virt-manager -y
-          sudo adduser `id -un` libvirt
-          sudo adduser `id -un` kvm
-          ls /etc/network
+          echo "-------------------"
+          sudo usermod -G -a kvm $USER
+          echo "-------------------"
+          sudo usermod -G -a libvirtd $USER
+          echo "-------------------"
+          ls -ld /dev/kvm
+          echo "-------------------"
+          ls /etc/udev
 
           # sudo apt install libvirt-daemon-system -y
           # sudo apt install qemu -y
