@@ -50,8 +50,6 @@ jobs:
       - name: Install KVM virtualization
         id: install_kvm
         run: |
-          egrep -c '(vmx|svm)' /proc/cpuinfo
-          echo "---------------------------"
           sudo apt update
           sudo apt install cpu-checker -y
           sudo apt install libvirt-daemon-system -y
@@ -66,9 +64,18 @@ jobs:
           # sudo systemctl enable --now libvirtd
           # sudo systemctl start libvirt
           # sudo systemctl status libvirtd
+          echo "-------------------"
           sudo adduser $(whoami) kvm
+          echo "-------------------"
           sudo adduser $USER kvm
+          echo "-------------------"
           sudo modprobe kvm
+          echo "-------------------"
+          exec bash -l
+          echo "-------------------"
+          sudo usermod -G -a kvm $(whoami)
+          echo "-------------------"
+          sudo usermod -G -a libvirtd $(whoami)
 
       - name: Set up Packer
         id: setup_packer
