@@ -6,7 +6,6 @@ on:
     branches:
       - main
 
-
 env:
   PRODUCT_VERSION: ${{ vars.PRODUCT_VERSION }}
   RESOURCE_GROUP_NAME: ${{ vars.RESOURCE_GROUP_NAME }}
@@ -27,6 +26,13 @@ jobs:
       - name: Checkout Repository
         id: checkout
         uses: actions/checkout@v4
+
+      - name: Set up SSH Key
+        run: |
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.SSH_PACKER_PRIVATE_KEYz }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
 
       - name: Login to Azure
         uses: azure/login@v1
@@ -55,9 +61,7 @@ jobs:
           sudo usermod -aG kvm $USER
           sudo addgroup libvirtd
           sudo usermod -aG libvirtd $USER
-          echo "-------------------"
           ls -ld /dev/kvm
-          echo "-------------------"
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660"' | sudo tee /etc/udev/rules.d/99-kvm.rules
           sudo udevadm control --reload-rules
           sudo systemctl restart libvirtd

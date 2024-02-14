@@ -2,8 +2,6 @@ locals {
   version = formatdate("YYYY.MM.DD", timestamp())
 }
 
-// data "sshkey" "packer" {}
-
 source "qemu" "rl9" {
   accelerator       = "kvm"
   boot_command      = [
@@ -20,9 +18,10 @@ source "qemu" "rl9" {
   iso_checksum         = "sha256:eb096f0518e310f722d5ebd4c69f0322df4fc152c6189f93c5c797dc25f3d2e1"
   http_directory       = "http"
   communicator         = "ssh"
+  ssh_port             = 22
   ssh_username         = "packer"
   ssh_password         = "s0m3password"
-  // ssh_private_key_file = data.sshkey.packer.private_key_path
+  ssh_private_key_file = "~/.ssh/id_rsa"
   ssh_timeout          = "30m"
   vm_name              = "rockylinux9"
   net_device           = "virtio-net"
