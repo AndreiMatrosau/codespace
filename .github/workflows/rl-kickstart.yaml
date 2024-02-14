@@ -59,7 +59,10 @@ jobs:
           echo "-------------------"
           ls -ld /dev/kvm
           echo "-------------------"
-          ls /etc/udev
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660"' | sudo tee /etc/udev/rules.d/99-kvm.rules
+          udevadm control --reload-rules
+          systemctl restart libvirtd
+          sudo chmod +666 /dev/kvm
 
           # sudo apt install libvirt-daemon-system -y
           # sudo apt install qemu -y
