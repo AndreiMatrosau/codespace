@@ -7,7 +7,7 @@ locals {
 source "qemu" "rl9" {
   accelerator       = "kvm"
   boot_command      = [
-    "<tab><bs><bs><bs><bs><bs>inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg<enter><wait>"
+    "<tab><bs><bs><bs><bs><bs>inst.sshd inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg<enter><wait>"
   ]
   cd_label             = "OEMDRV"
   boot_wait            = "10s"
