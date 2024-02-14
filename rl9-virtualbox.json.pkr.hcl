@@ -2,10 +2,7 @@ locals {
   version = formatdate("YYYY.MM.DD", timestamp())
 }
 
-data "sshkey" "packer" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
+data "sshkey" "packer" {}
 
 source "qemu" "rl9" {
   accelerator       = "kvm"
