@@ -20,6 +20,7 @@ source "qemu" "rl9" {
   disk_interface    = "virtio"
   boot_wait         = "10s"
   display           = "none"
+  headless          = true
   boot_command      = [
     "<tab><bs><bs><bs><bs><bs>inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg<enter><wait>"
   ]
