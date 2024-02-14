@@ -19,6 +19,7 @@ source "qemu" "rl9" {
   net_device        = "virtio-net"
   disk_interface    = "virtio"
   boot_wait         = "10s"
+  display           = "none"
   boot_command      = [
     "<tab><bs><bs><bs><bs><bs>inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg<enter><wait>"
   ]
