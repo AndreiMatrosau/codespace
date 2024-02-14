@@ -8,6 +8,7 @@ on:
 
 
 env:
+  PACKER_LOG: 1
   PRODUCT_VERSION: ${{ vars.PRODUCT_VERSION }}
   RESOURCE_GROUP_NAME: ${{ vars.RESOURCE_GROUP_NAME }}
   LOCATION: ${{ vars.LOCATION }}
