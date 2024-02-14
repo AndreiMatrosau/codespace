@@ -51,13 +51,12 @@ jobs:
         id: install_kvm
         run: |
           sudo apt-get update
-          sudo apt-get install kvm qemu-kvm libvirt-bin virtinst
-          sudo apt install virt-manager 
+          sudo apt-get install qemu qemu-kvm libvirt-daemon-system -y
+          sudo apt install virt-manager -y
           sudo adduser `id -un` libvirt
           sudo adduser `id -un` kvm
           ls /etc/network
-          # sudo apt update
-          # sudo apt install cpu-checker -y
+
           # sudo apt install libvirt-daemon-system -y
           # sudo apt install qemu -y
           # sudo apt install qemu-kvm -y
