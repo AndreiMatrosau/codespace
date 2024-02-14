@@ -21,7 +21,7 @@ source "qemu" "rl9" {
   ssh_port             = 22
   ssh_username         = "packer"
   ssh_password         = "s0m3password"
-  ssh_private_key_file = "~/.ssh/id_rsa"
+  ssh_private_key_file = "./ssh/id_rsa"
   ssh_timeout          = "30m"
   vm_name              = "rockylinux9"
   net_device           = "virtio-net"

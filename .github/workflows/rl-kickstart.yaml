@@ -27,12 +27,12 @@ jobs:
         id: checkout
         uses: actions/checkout@v4
 
-      - name: Set up SSH Key
-        run: |
-          mkdir -p ~/.ssh/
-          echo "${{ secrets.SSH_PACKER_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
+      # - name: Set up SSH Key
+      #   run: |
+      #     mkdir -p ~/.ssh/
+      #     echo "${{ secrets.SSH_PACKER_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+      #     chmod 600 ~/.ssh/id_rsa
+      #     ssh-keyscan github.com >> ~/.ssh/known_hosts
 
       - name: Login to Azure
         uses: azure/login@v1
