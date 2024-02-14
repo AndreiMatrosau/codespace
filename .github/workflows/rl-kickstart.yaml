@@ -8,7 +8,6 @@ on:
 
 
 env:
-  PACKER_LOG: 1
   PRODUCT_VERSION: ${{ vars.PRODUCT_VERSION }}
   RESOURCE_GROUP_NAME: ${{ vars.RESOURCE_GROUP_NAME }}
   LOCATION: ${{ vars.LOCATION }}
@@ -88,7 +87,7 @@ jobs:
       - name: Build Image
         id: build_packer_image
         run: |
-          packer build -var-file="dev.pkrvars.hcl" \
+          PACKER_LOG=1 packer build -var-file="dev.pkrvars.hcl" \
                        -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
                        -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
                        -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
