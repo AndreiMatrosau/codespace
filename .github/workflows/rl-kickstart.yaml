@@ -61,7 +61,9 @@ jobs:
           sudo usermod -aG kvm $USER
           sudo addgroup libvirtd
           sudo usermod -aG libvirtd $USER
+          echo "-----------------"
           sudo ls -ld /dev/kvm
+          echo "-----------------"
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660"' | sudo tee /etc/udev/rules.d/99-kvm.rules
           sudo udevadm control --reload-rules
           sudo systemctl restart libvirtd
