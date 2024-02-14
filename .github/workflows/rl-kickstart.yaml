@@ -57,7 +57,6 @@ jobs:
           sudo apt install libvirt-daemon-system -y
           sudo apt install qemu -y
           sudo apt install qemu-kvm -y
-          sudo adduser $(whoami) kvm
           sudo chown root:kvm /dev/kvm
           sudo chmod 660 /dev/kvm
           sudo apt install virt-manager -y
@@ -67,6 +66,9 @@ jobs:
           # sudo systemctl enable --now libvirtd
           # sudo systemctl start libvirt
           # sudo systemctl status libvirtd
+          sudo adduser $(whoami) kvm
+          sudo adduser $USER kvm
+          sudo modprobe kvm
 
       - name: Set up Packer
         id: setup_packer
