@@ -4,6 +4,9 @@ locals {
 
 source "qemu" "rl9" {
   vm_name                = "rockylinux9"
+  qemuargs               = [
+    "-cpu", "host",
+  ]
   accelerator            = "kvm"
   cd_label               = "OEMDRV"
   cpus                   = "2"
@@ -24,7 +27,6 @@ source "qemu" "rl9" {
   ssh_timeout            = "10m"
   ssh_handshake_attempts = 2
   pause_before_connecting = "20s"
-  skip_nat_mapping       = "true"
   net_device             = "virtio-net"
   headless               = true
   display                = "none"
