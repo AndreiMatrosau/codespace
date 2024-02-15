@@ -26,17 +26,19 @@ source "qemu" "rl9" {
   ssh_username           = "packer"
   ssh_password         = "s0m3password"
   // ssh_private_key_file   = "./ssh/id_rsa"
-  ssh_timeout            = "10m"
+  ssh_timeout            = "30m"
   ssh_handshake_attempts = 2
-  pause_before_connecting = "20s"
-  net_device             = "virtio-net"
-  headless               = true
+  ssh_port_min           = 2222
+  ssh_port_max           = 2229
+  pause_before_connecting = "60s"
+  net_device             = "virtio-net-pci"
+  headless               = false
   display                = "none"
   output_directory       = "output-rocky_linux"
   shutdown_command       = "echo 'packer' | sudo -S shutdown -P now"
   boot_wait              = "10s"  
   boot_command           = [
-    "<tab><bs><bs><bs><bs><bs>inst.sshd inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/http/ks.cfg<enter><wait>"
+    "<tab> sshd text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/http/ks.cfg<enter><wait>"
   ]
 }
 
