@@ -13,7 +13,7 @@ source "qemu" "rl9" {
   format                 = "qcow2"
   iso_url                = "https://download.rockylinux.org/pub/rocky/9.3/isos/x86_64/Rocky-9.3-x86_64-boot.iso"
   iso_checksum           = "sha256:eb096f0518e310f722d5ebd4c69f0322df4fc152c6189f93c5c797dc25f3d2e1"
-  iso_target_path        = "iso/Rocky-9.3-x86_64-boot.iso"
+  // iso_target_path        = "iso/Rocky-9.3-x86_64-boot.iso"
   iso_target_extension   = "iso"
   http_directory         = "http"
   communicator           = "ssh"
@@ -23,6 +23,8 @@ source "qemu" "rl9" {
   // ssh_private_key_file   = "./ssh/id_rsa"
   ssh_timeout            = "10m"
   ssh_handshake_attempts = 2
+  pause_before_connecting = "20s"
+  skip_nat_mapping       = "true"
   net_device             = "virtio-net"
   headless               = true
   display                = "none"
