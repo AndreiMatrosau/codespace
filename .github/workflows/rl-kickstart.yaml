@@ -83,7 +83,8 @@ jobs:
 
       - name: Run `packer init`
         id: init_packer
-        run: "packer init ."
+        run: |
+          packer init rocky8.pkr.hcl
 
       - name: Run `packer validate`
         id: validate_packer
@@ -92,7 +93,7 @@ jobs:
                           -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
                           -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
                           -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
-                          -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' .
+                          -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' rocky8.pkr.hcl
 
       - name: Build Image
         id: build_packer_image
@@ -103,7 +104,7 @@ jobs:
                        -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
                        -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
                        -debug \
-                       -force .
+                       -force rocky8.pkr.hcl
 
   # run_vm_custom_image:
   #   runs-on: ubuntu-latest
