@@ -91,3 +91,12 @@ build {
     inline          = ["yum -y install epel-release", "yum repolist", "yum -y install ansible"]
   }
 }
+
+packer {
+  required_plugins {
+    qemu = {
+      version = "~> 1"
+      source  = "github.com/hashicorp/qemu"
+    }
+  }
+}
