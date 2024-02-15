@@ -89,22 +89,24 @@ jobs:
       - name: Run `packer validate`
         id: validate_packer
         run: |
-          packer validate -var-file="dev.pkrvars.hcl" \
-                          -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
-                          -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
-                          -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
-                          -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' rocky8.pkr.hcl
+          packer validate rocky8.pkr.hcl
+          # packer validate -var-file="dev.pkrvars.hcl" \
+          #                 -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
+          #                 -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
+          #                 -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
+          #                 -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' rocky8.pkr.hcl
 
       - name: Build Image
         id: build_packer_image
         run: |
-          PACKER_LOG=1 packer build -var-file="dev.pkrvars.hcl" \
-                       -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
-                       -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
-                       -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
-                       -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
-                       -debug \
-                       -force rocky8.pkr.hcl
+          PACKER_LOG=1 packer build rocky8.pkr.hcl
+          # PACKER_LOG=1 packer build -var-file="dev.pkrvars.hcl" \
+          #              -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
+          #              -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
+          #              -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
+          #              -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
+          #              -debug \
+          #              -force rocky8.pkr.hcl
 
   # run_vm_custom_image:
   #   runs-on: ubuntu-latest
