@@ -27,12 +27,12 @@ jobs:
         id: checkout
         uses: actions/checkout@v4
 
-      # - name: Set up SSH Key
-      #   run: |
-      #     mkdir -p ~/.ssh/
-      #     echo "${{ secrets.SSH_PACKER_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-      #     chmod 600 ~/.ssh/id_rsa
-      #     ssh-keyscan github.com >> ~/.ssh/known_hosts
+      - name: Set X11 forwarding
+        run: |
+          sudo apt-get install xauth -y
+          sudo sed -i 's/#X11Forwarding no/X11Forwarding yes/g' /etc/ssh/sshd_config
+          sudo service ssh restart
+          grep X11Forwarding /etc/ssh/sshd_config
 
       - name: Login to Azure
         uses: azure/login@v1

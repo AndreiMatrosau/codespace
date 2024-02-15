@@ -32,7 +32,7 @@ source "qemu" "rl9" {
   host_port_max           = 2229
   pause_before_connecting = "60s"
   net_device             = "virtio-net-pci"
-  headless               = false
+  headless               = true
   display                = "none"
   output_directory       = "output-rocky_linux"
   shutdown_command       = "echo 'packer' | sudo -S shutdown -P now"
