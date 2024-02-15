@@ -5,7 +5,9 @@ locals {
 source "qemu" "rl9" {
   vm_name                = "rockylinux9"
   qemuargs               = [
-    "-cpu", "host",
+    "-cpu",
+    "host",
+    ""
   ]
   accelerator            = "kvm"
   cd_label               = "OEMDRV"
