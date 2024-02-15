@@ -28,8 +28,8 @@ source "qemu" "rl9" {
   // ssh_private_key_file   = "./ssh/id_rsa"
   ssh_timeout            = "30m"
   ssh_handshake_attempts = 2
-  ssh_port_min           = 2222
-  ssh_port_max           = 2229
+  host_port_min           = 2222
+  host_port_max           = 2229
   pause_before_connecting = "60s"
   net_device             = "virtio-net-pci"
   headless               = false
