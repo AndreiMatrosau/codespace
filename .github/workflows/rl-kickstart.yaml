@@ -29,9 +29,9 @@ jobs:
 
       - name: Set X11 forwarding
         run: |
-          sudo apt-get install xauth -y
-          sudo sed -i 's/#X11Forwarding no/X11Forwarding yes/g' /etc/ssh/sshd_config
-          sudo service ssh restart
+          # sudo apt-get install xauth -y
+          # sudo sed -i 's/#X11Forwarding no/X11Forwarding yes/g' /etc/ssh/sshd_config
+          # sudo service ssh restart
           grep X11Forwarding /etc/ssh/sshd_config
 
       - name: Login to Azure

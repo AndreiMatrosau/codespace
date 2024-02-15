@@ -23,6 +23,7 @@ source "qemu" "rl9" {
   http_directory         = "http"
   communicator           = "ssh"
   ssh_port               = 22
+  ssh_pty               = trues
   ssh_username           = "packer"
   ssh_password         = "s0m3password"
   // ssh_private_key_file   = "./ssh/id_rsa"
