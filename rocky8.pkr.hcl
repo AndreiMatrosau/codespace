@@ -90,14 +90,4 @@ build {
     execute_command = "{{ .Vars }} sudo -E bash '{{ .Path }}'"
     inline          = ["yum -y install epel-release", "yum repolist", "yum -y install ansible"]
   }
-
-  provisioner "ansible-local" {
-    playbook_dir  = "ansible"
-    playbook_file = "ansible/playbook.yml"
-  }
-
-  post-processor "shell-local" {
-    environment_vars = ["IMAGE_NAME=${var.name}", "IMAGE_VERSION=${var.version}", "DESTINATION_SERVER=${var.destination_server}"]
-    script           = "scripts/push-image.sh"
-  }
 }
