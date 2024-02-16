@@ -75,7 +75,7 @@ source "qemu" "rocky8" {
   iso_url          = var.iso_url
   net_device       = "virtio-net"
   output_directory = "artifacts/qemu/${var.name}${var.version}"
-  qemu_binary      = "/usr/bin/qemu-system-x86_64"
+  qemu_binary      = "/usr/libexec/qemu-kvm"
   qemuargs         = [["-m", "${var.ram}M"], ["-smp", "${var.cpu}"]]
   shutdown_command = "sudo /usr/sbin/shutdown -h now"
   ssh_password     = var.ssh_password
