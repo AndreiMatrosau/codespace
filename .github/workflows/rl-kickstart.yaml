@@ -55,7 +55,6 @@ jobs:
       - name: Install KVM virtualization
         id: install_kvm
         run: |
-          kvm-ok
           sudo apt-get update
           sudo apt-get install qemu qemu-kvm libvirt-daemon-system -y
           sudo apt-get install libvirt-clients virt-manager bridge-utils -y
