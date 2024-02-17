@@ -46,9 +46,5 @@ packer {
       version = "~> 1"
       source  = "github.com/hashicorp/qemu"
     }
-    shell = {
-      version = "~> 1"
-      source  = "github.com/hashicorp/packer-plugin-shell"
-    }
   }
 }
