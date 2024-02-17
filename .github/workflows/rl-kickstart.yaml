@@ -57,7 +57,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install qemu qemu-kvm libvirt-daemon-system -y
-          sudo apt-get install libvirt-clients virt-manager bridge-utils virt-install libguestfs guestfs-toolsp-y
+          sudo apt-get install libvirt-clients virt-manager bridge-utils -y
           sudo usermod -aG kvm $USER
           sudo addgroup libvirtd
           sudo usermod -aG libvirtd $USER

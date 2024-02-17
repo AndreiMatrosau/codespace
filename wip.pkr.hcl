@@ -18,8 +18,8 @@ source "qemu" "example" {
   format            = "qcow2"
   accelerator       = "hvf"
   communicator      = "ssh"
-  // headless          = true
-  // display           = "none"
+  headless          = true
+  display           = "none"
   http_directory    = "http"
   ssh_username      = "root"
   ssh_password      = "packer"
@@ -35,6 +35,9 @@ source "qemu" "example" {
 
 build {
   sources = ["source.qemu.example"]
+  provisioner "shell" {
+    inline = ["cloud-init status --wait"]
+  }
 }
 
 packer {
@@ -42,6 +45,10 @@ packer {
     qemu = {
       version = "~> 1"
       source  = "github.com/hashicorp/qemu"
+    }
+    shell = {
+      version = "~> 1"
+      source  = "github.com/hashicorp/packer-plugin-shell"
     }
   }
 }
