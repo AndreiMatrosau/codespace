@@ -69,13 +69,13 @@ jobs:
           sudo chmod 666 /dev/kvm
           export DISPLAY=
 
-      - name: Check qemu
-        id: check_qemu
-        run: |
-          kvm-ok
-          libvirt list --all
-          sudo systemctl status libvirtd
-          qemu-system-x86_64 -net nic,model=? 
+      # - name: Check qemu
+      #   id: check_qemu
+      #   run: |
+      #     kvm-ok
+      #     libvirt list --all
+      #     sudo systemctl status libvirtd
+      #     qemu-system-x86_64 -net nic,model=? 
 
       - name: Set up Packer
         id: setup_packer
