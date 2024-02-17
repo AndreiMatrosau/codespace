@@ -18,3 +18,11 @@ az sig image-definition create \
     --offer <image_offer> \
     --sku <image_sku> \
     --os-type linux
+
+```bash
+brew install qemu
+qemu-system-x86_64 --version
+qemu-img convert -f raw -O vpc /path/to/your.iso /path/to/your.vhd
+az storage blob upload --account-name mystorageaccount --container-name mycontainer --name mydisk.vhd --type page --file ./path/to/mydisk.vhd
+az disk create --resource-group myResourceGroup --name myDisk --source https://mystorageaccount.blob.core.windows.net/mycontainer/mydisk.vhd
+az vm create --resource-group myResourceGroup --name myVM --attach-os-disk myDisk --os-type linux

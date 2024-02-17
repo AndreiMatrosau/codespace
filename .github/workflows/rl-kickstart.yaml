@@ -57,7 +57,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install qemu qemu-kvm libvirt-daemon-system -y
-          sudo apt-get install libvirt-clients virt-manager bridge-utils -y
+          sudo apt-get install libvirt-clients virt-manager bridge-utils virt-install libguestfs guestfs-toolsp-y
           sudo usermod -aG kvm $USER
           sudo addgroup libvirtd
           sudo usermod -aG libvirtd $USER
@@ -87,12 +87,12 @@ jobs:
       - name: Run `packer init`
         id: init_packer
         run: |
-          packer init rocky8.pkr.hcl
+          packer init wip.pkr.hcl
 
       - name: Run `packer validate`
         id: validate_packer
         run: |
-          packer validate rocky8.pkr.hcl
+          packer validate wip.pkr.hcl
           # packer validate -var-file="dev.pkrvars.hcl" \
           #                 -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
           #                 -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
@@ -102,7 +102,7 @@ jobs:
       - name: Build Image
         id: build_packer_image
         run: |
-          PACKER_LOG=1 packer build rocky8.pkr.hcl
+          PACKER_LOG=1 packer build wip.pkr.hcl
           # PACKER_LOG=1 packer build -var-file="dev.pkrvars.hcl" \
           #              -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
           #              -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
