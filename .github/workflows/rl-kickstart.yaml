@@ -28,10 +28,6 @@ jobs:
         id: checkout
         uses: actions/checkout@v4
 
-      - name: Check X11
-        run: |
-          grep X11Forwarding /etc/ssh/sshd_config
-
       - name: Login to Azure
         uses: azure/login@v1
         with:
@@ -66,10 +62,6 @@ jobs:
           sudo systemctl restart libvirtd
           sudo chmod 666 /dev/kvm
           export DISPLAY=
-
-      - name: Install QEMU
-        id: setup_qemu
-        run: sudo apt-get install qemu-utils -y
 
       - name: Set up Packer
         id: setup_packer
@@ -141,7 +133,7 @@ jobs:
           --name ${{ env.STORAGE_ACCOUNT_NAME }} \
           --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
           --location ${{ env.LOCATION }} \
-          --sku ${{ env.STORAGE_ACCOUNT_SKU }} //TODO: Standard_LRS
+          --sku ${{ env.STORAGE_ACCOUNT_SKU }}
     
       - name: Create container
         id: create_vhd_container
@@ -156,7 +148,7 @@ jobs:
           az storage blob upload \
           --account-name ${{ env.STORAGE_ACCOUNT_NAME }} \
           --container-name ${{ env.CONTAINER_NAME }} \
-          --name rocky9.vhd \
+          --name ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.VHD_DISK_NAME }} \
           --type page \
           --file ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.VHD_DISK_NAME }}
 
@@ -166,7 +158,7 @@ jobs:
           az disk create \
           --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
           --name ${{ env.VM_DISK_NAME }} \
-          --source https://${{ env.STORAGE_ACCOUNT_NAME }}.blob.core.windows.net/${{ env.CONTAINER_NAME }}/rocky9.vhd
+          --source https://${{ env.STORAGE_ACCOUNT_NAME }}.blob.core.windows.net/${{ env.CONTAINER_NAME }}/${{ env.VHD_DISK_NAME }}
 
       - name: Create VM
         id: create_vm
@@ -217,4 +209,3 @@ jobs:
           az group delete \
             --name ${{ env.RESOURCE_GROUP_NAME }} \
             --yes
-
