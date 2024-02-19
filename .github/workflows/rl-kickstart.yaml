@@ -161,7 +161,7 @@ jobs:
           --file ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.VHD_DISK_NAME }}
 
       - name: Create disk from VHD
-        create_vm_disk
+        id: create_vm_disk
         run: |
           az disk create \
           --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
