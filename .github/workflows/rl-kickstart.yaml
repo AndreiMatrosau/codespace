@@ -11,16 +11,17 @@ env:
   RESOURCE_GROUP_NAME: ${{ vars.RESOURCE_GROUP_NAME }}
   LOCATION: ${{ vars.LOCATION }}
   VM_NAME: ${{ vars.VM_NAME }}
-  PLAN_NAME: ${{ vars.PLAN_NAME }}
-  PLAN_PRODUCT: ${{ vars.PLAN_PRODUCT }}
-  PLAN_PUBLISHER: ${{ vars.PLAN_PUBLISHER }}
-  COMPUTE_GALLERY_NAME: ${{ vars.COMPUTE_GALLERY_NAME }}
-  COMPUTE_GALLERY_RESOURCE_GROUP_NAME: ${{ vars.COMPUTE_GALLERY_RESOURCE_GROUP_NAME }}
-  VM_ADMIN_USER_NAME: ${{ vars.VM_ADMIN_USER_NAME }}
+  VHD_DISK_NAME: ${{ vars.VHD_DISK_NAME }}
+  QCOW2_DISK_NAME: ${{ vars.QCOW2_DISK_NAME }}
+  VM_USER_NAME: ${{ vars.VM_USER_NAME }}
+  STORAGE_ACCOUNT_NAME: ${{ vars.STORAGE_ACCOUNT_NAME }}
+  STORAGE_ACCOUNT_SKU: ${{ vars.STORAGE_ACCOUNT_SKU }}
+  CONTAINER_NAME: ${{ vars.CONATAINER_NAME }}
+  QEMU_IMAGE_OUTPUT_DIR: ${{ vars.QEMU_IMAGE_OUTPUT_DIR }}
 
 jobs:
   build_packer_image:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout Repository
@@ -67,7 +68,8 @@ jobs:
           export DISPLAY=
 
       - name: Install QEMU
-        run: sudo apt-get install qemu-utils
+        id: setup_qemu
+        run: sudo apt-get install qemu-utils -y
 
       - name: Set up Packer
         id: setup_packer
@@ -79,63 +81,41 @@ jobs:
       - name: Run `packer init`
         id: init_packer
         run: |
-          packer init wip.pkr.hcl
+          packer init .
 
       - name: Run `packer validate`
         id: validate_packer
         run: |
-          packer validate wip.pkr.hcl
-          # packer validate -var-file="dev.pkrvars.hcl" \
-          #                 -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
-          #                 -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
-          #                 -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
-          #                 -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' rocky8.pkr.hcl
+          packer validate -var-file="dev.pkrvars.hcl" \
+                          -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
+                          -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
+                          -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
+                          -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' .
 
       - name: Build Image
         id: build_packer_image
         run: |
-          PACKER_LOG=1 packer build wip.pkr.hcl
-          # PACKER_LOG=1 packer build -var-file="dev.pkrvars.hcl" \
-          #              -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
-          #              -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
-          #              -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
-          #              -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
-          #              -debug \
-          #              -force rocky8.pkr.hcl
+          PACKER_LOG=1 packer build -var-file="dev.pkrvars.hcl" \
+                       -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
+                       -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
+                       -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
+                       -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
+                       -debug \
+                       -force .
 
       - name: Convert disk image to VHD
         id: qcow2_to_vhd
         run: |
-          qemu-img convert -f qcow2 -o subformat=fixed,force_size -O vpc rocky9 rocky9-fixed.vhd -p
-
-      - name: Create resource group
-        run: |
-          az group create --name ${{ secrets.RESOURCE_GROUP }} --location eastus
-    
-      - name: Create storage account
-        run: |
-          az storage account create --name ${{ secrets.STORAGE_ACCOUNT }} --resource-group ${{ secrets.RESOURCE_GROUP }} --location eastus --sku Standard_LRS
-    
-      - name: Create container
-        run: |
-          az storage container create --name ${{ secrets.CONTAINER_NAME }} --account-name ${{ secrets.STORAGE_ACCOUNT }}
-    
-      - name: Upload VHD to storage account
-        run: |
-          az storage blob upload --account-name ${{ secrets.STORAGE_ACCOUNT }} --container-name ${{ secrets.CONTAINER_NAME }} --name rocky9.vhd --type page --file ./rocky9.vhd
-          az storage blob upload --account-name packerrockylinux9 --container-name packerrockylinux9 --name rocky9-fixed.vhd --type page --file ./rocky9-fixed.vhd
-      
-      - name: Create disk from VHD
-        run: |
-          az disk create --resource-group ${{ secrets.RESOURCE_GROUP }} --name ${{ secrets.DISK_NAME }} --source https://${{ secrets.STORAGE_ACCOUNT }}.blob.core.windows.net/${{ secrets.CONTAINER_NAME }}/rocky9.vhd
-          az disk create --name rockyLinuxDisk --resource-group rg-packer --source https://packerrockylinux9.blob.core.windows.net/packerrockylinux9/rocky9-fixed.vhd
-          
-          
-          # az vm create --resource-group rg-packer --location eastus --name rockylinux9 --attach-os-disk rockyLinuxDisk --os-type linux
+          qemu-img convert \
+          -f qcow2 \
+          -o subformat=fixed,force_size \
+          -O vpc \
+          ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.QCOW2_DISK_NAME }} ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.VHD_DISK_NAME }} \
+          -p          
 
   run_vm_custom_image:
-    runs-on: ubuntu-latest
-    # needs: [build_packer_image]
+    runs-on: ubuntu-22.04
+    needs: [build_packer_image]
 
     steps: 
       - name: Checkout Repository
@@ -154,47 +134,69 @@ jobs:
           --name ${{ env.RESOURCE_GROUP_NAME }} \
           --location ${{ env.LOCATION }}
 
-  #     - name: Create VM
-  #       id: create_vm
-  #       run: |
-  #         IMAGE_ID=$(az sig image-definition list \
-  #           --resource-group ${{ env.COMPUTE_GALLERY_RESOURCE_GROUP_NAME }} \
-  #           --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
-  #           --query "[].[id]" \
-  #           --output tsv)
-  #         az vm create \
-  #           --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-  #           --location ${{ env.LOCATION }} \
-  #           --name ${{ env.VM_NAME }} \
-  #           --image ${IMAGE_ID} \
-  #           --plan-name ${{ env.PLAN_NAME }} \
-  #           --plan-product ${{ env.PLAN_PRODUCT }} \
-  #           --plan-publisher ${{ env.PLAN_PUBLISHER }} \
-  #           --nic-delete-option delete \
-  #           --os-disk-delete-option delete \
-  #           --admin-username ${{ vars.VM_ADMIN_USER_NAME }} \
-  #           --generate-ssh-keys \
-  #           --custom-data cloud_init.txt
+      - name: Create storage account
+        id: create_vhd_sa
+        run: |
+          az storage account create \
+          --name ${{ env.STORAGE_ACCOUNT_NAME }} \
+          --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+          --location ${{ env.LOCATION }} \
+          --sku ${{ env.STORAGE_ACCOUNT_SKU }} //TODO: Standard_LRS
+    
+      - name: Create container
+        id: create_vhd_container
+        run: |
+          az storage container create \
+          --name ${{ env.CONTAINER_NAME }} \
+          --account-name ${{ env.STORAGE_ACCOUNT_NAME }}
+    
+      - name: Upload VHD to storage account
+        id: upload_vhd
+        run: |
+          az storage blob upload \
+          --account-name ${{ env.STORAGE_ACCOUNT_NAME }} \
+          --container-name ${{ env.CONTAINER_NAME }} \
+          --name rocky9.vhd \
+          --type page \
+          --file ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.VHD_DISK_NAME }}
 
-  #     - name: Open VM SSH port
-  #       id: open_vm_ssh_port
-  #       run: |
-  #         az vm open-port \
-  #         --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-  #         --name ${{ env.VM_NAME }} \
-  #         --port 22
+      - name: Create disk from VHD
+        create_vm_disk
+        run: |
+          az disk create \
+          --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+          --name ${{ env.VM_DISK_NAME }} \
+          --source https://${{ env.STORAGE_ACCOUNT_NAME }}.blob.core.windows.net/${{ env.CONTAINER_NAME }}/rocky9.vhd
 
-  #     - name: Run CIS Rocky Linux tests
-  #       id: cis_tests
-  #       run: |
-  #         PUBLIC_IP=$(az vm show \
-  #           --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-  #           --name ${{ env.VM_NAME }} \
-  #           --show-details \
-  #           --query publicIps \
-  #           --output tsv)
-  #         ssh-keyscan -H -t rsa ${PUBLIC_IP}  >> ~/.ssh/known_hosts
-  #         ssh -i ~/.ssh/id_rsa ${{ vars.VM_ADMIN_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
+      - name: Create VM
+        id: create_vm
+        run: |
+          az vm create \
+          --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+          --location ${{ env.LOCATION }} \
+          --name ${{ env.VM_NAME }} \
+          --attach-os-disk ${{ env.VHD_DISK_NAME }} \
+          --os-type linux
+
+      - name: Open VM SSH port
+        id: open_vm_ssh_port
+        run: |
+          az vm open-port \
+          --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+          --name ${{ env.VM_NAME }} \
+          --port 22
+
+      - name: Run CIS Rocky Linux tests
+        id: cis_tests
+        run: |
+          PUBLIC_IP=$(az vm show \
+            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+            --name ${{ env.VM_NAME }} \
+            --show-details \
+            --query publicIps \
+            --output tsv)
+          ssh-keyscan -H -t rsa ${PUBLIC_IP}  >> ~/.ssh/known_hosts
+          ssh -i ~/.ssh/id_rsa ${{ vars.VM_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
 
       - name: Shutdown and dismantle VM
         id: shutdown_dismantle_vm
