@@ -41,121 +41,108 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # - name: Checking file change
-      #   id: check_file_changed
-      #   run: |
-      #     diff=$(git diff --name-only HEAD^ HEAD dev.pkvars.hcl)
+      - name: Set up Packer
+        id: setup_packer
+        # if: steps.check_file_changed.outputs.docs_changed == 'True'
+        uses: hashicorp/setup-packer@main
+        with:
+          version: ${{ env.PRODUCT_VERSION }}
 
-      #     SourceDiff=$(echo "$diff" | grep -E '^docs/|.md$')
-      #     HasDiff=0
-      #     if [ -n "$SourceDiff" ]; then
-      #       HasDiff=1
-      #     fi
+      - name: Run `packer init`
+        id: init_packer
+        run: |
+          packer init .
 
-      #     echo "::set-output name=docs_changed::$HasDiff"
+      - name: Run `packer validate`
+        id: validate_packer
+        run: |
+          packer validate -var-file="dev.pkrvars.hcl" \
+                          -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
+                          -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
+                          -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
+                          -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' .
 
-      # - name: Set up Packer
-      #   id: setup_packer
-      #   # if: steps.check_file_changed.outputs.docs_changed == 'True'
-      #   uses: hashicorp/setup-packer@main
-      #   with:
-      #     version: ${{ env.PRODUCT_VERSION }}
+      - name: Build Image
+        id: build_packer_image
+        run: |
+          PACKER_LOG=1 packer build -var-file="dev.pkrvars.hcl" \
+                       -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
+                       -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
+                       -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
+                       -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
+                       -debug \
+                       -force .
 
-      # - name: Run `packer init`
-      #   id: init_packer
-      #   run: |
-      #     packer init .
+      - name: Install KVM virtualization
+        id: install_kvm
+        run: |
+          sudo apt-get update
+          sudo apt-get install qemu qemu-kvm libvirt-daemon-system -y
+          sudo apt-get install libvirt-clients virt-manager bridge-utils -y
+          sudo usermod -aG kvm $USER
+          sudo addgroup libvirtd
+          sudo usermod -aG libvirtd $USER
+          sudo adduser $USER libvirt
+          ls -ld /dev/kvm
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660"' | sudo tee /etc/udev/rules.d/99-kvm.rules
+          sudo udevadm control --reload-rules
+          sudo systemctl restart libvirtd
+          sudo chmod 666 /dev/kvm
+          export DISPLAY=
 
-      # - name: Run `packer validate`
-      #   id: validate_packer
-      #   run: |
-      #     packer validate -var-file="dev.pkrvars.hcl" \
-      #                     -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
-      #                     -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
-      #                     -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
-      #                     -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' .
+      - name: Convert disk image to VHD
+        id: qcow2_to_vhd
+        run: |
+          ls ${{ env.QEMU_IMAGE_OUTPUT_DIR }}
+          qemu-img convert \
+          -f qcow2 \
+          -o subformat=fixed,force_size \
+          -O vpc \
+          ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.QCOW2_DISK_NAME }} ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.VHD_DISK_NAME }} \
+          -p          
 
-      # - name: Build Image
-      #   id: build_packer_image
-      #   run: |
-      #     PACKER_LOG=1 packer build -var-file="dev.pkrvars.hcl" \
-      #                  -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
-      #                  -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
-      #                  -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
-      #                  -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
-      #                  -debug \
-      #                  -force .
+      - name: Create VM Resource group
+        id: create_vm_resource_group
+        run: |
+          az group create \
+          --name ${{ env.RESOURCE_GROUP_NAME }} \
+          --location ${{ env.LOCATION }}
 
-      # - name: Install KVM virtualization
-      #   id: install_kvm
-      #   run: |
-      #     sudo apt-get update
-      #     sudo apt-get install qemu qemu-kvm libvirt-daemon-system -y
-      #     sudo apt-get install libvirt-clients virt-manager bridge-utils -y
-      #     sudo usermod -aG kvm $USER
-      #     sudo addgroup libvirtd
-      #     sudo usermod -aG libvirtd $USER
-      #     sudo adduser $USER libvirt
-      #     ls -ld /dev/kvm
-      #     echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660"' | sudo tee /etc/udev/rules.d/99-kvm.rules
-      #     sudo udevadm control --reload-rules
-      #     sudo systemctl restart libvirtd
-      #     sudo chmod 666 /dev/kvm
-      #     export DISPLAY=
-
-      # - name: Convert disk image to VHD
-      #   id: qcow2_to_vhd
-      #   run: |
-      #     ls ${{ env.QEMU_IMAGE_OUTPUT_DIR }}
-      #     qemu-img convert \
-      #     -f qcow2 \
-      #     -o subformat=fixed,force_size \
-      #     -O vpc \
-      #     ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.QCOW2_DISK_NAME }} ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.VHD_DISK_NAME }} \
-      #     -p          
-
-      # - name: Create VM Resource group
-      #   id: create_vm_resource_group
-      #   run: |
-      #     az group create \
-      #     --name ${{ env.RESOURCE_GROUP_NAME }} \
-      #     --location ${{ env.LOCATION }}
-
-      # - name: Create storage account
-      #   id: create_vhd_storage_account
-      #   run: |
-      #     az storage account create \
-      #     --name ${{ env.STORAGE_ACCOUNT_NAME }} \
-      #     --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-      #     --location ${{ env.LOCATION }} \
-      #     --sku ${{ env.STORAGE_ACCOUNT_SKU }} \
-      #     --allow-blob-public-access true
+      - name: Create storage account
+        id: create_vhd_storage_account
+        run: |
+          az storage account create \
+          --name ${{ env.STORAGE_ACCOUNT_NAME }} \
+          --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+          --location ${{ env.LOCATION }} \
+          --sku ${{ env.STORAGE_ACCOUNT_SKU }} \
+          --allow-blob-public-access true
     
-      # - name: Create container
-      #   id: create_vhd_container
-      #   run: |
-      #     az storage container create \
-      #     --name ${{ env.CONTAINER_NAME }} \
-      #     --account-name ${{ env.STORAGE_ACCOUNT_NAME }}
+      - name: Create container
+        id: create_vhd_container
+        run: |
+          az storage container create \
+          --name ${{ env.CONTAINER_NAME }} \
+          --account-name ${{ env.STORAGE_ACCOUNT_NAME }}
     
-      # - name: Upload VHD to storage account
-      #   id: upload_vhd
-      #   run: |
-      #     az storage blob upload \
-      #     --account-name ${{ env.STORAGE_ACCOUNT_NAME }} \
-      #     --container-name ${{ env.CONTAINER_NAME }} \
-      #     --name ${{ env.VHD_DISK_NAME }} \
-      #     --type page \
-      #     --file ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.VHD_DISK_NAME }} \
-      #     --overwrite true
+      - name: Upload VHD to storage account
+        id: upload_vhd
+        run: |
+          az storage blob upload \
+          --account-name ${{ env.STORAGE_ACCOUNT_NAME }} \
+          --container-name ${{ env.CONTAINER_NAME }} \
+          --name ${{ env.VHD_DISK_NAME }} \
+          --type page \
+          --file ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.VHD_DISK_NAME }} \
+          --overwrite true
 
-      # - name: Create VM disk from VHD
-      #   id: create_vm_disk
-      #   run: |
-      #     az disk create \
-      #     --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-      #     --name ${{ env.VHD_DISK_NAME }} \
-      #     --source https://${{ env.STORAGE_ACCOUNT_NAME }}.blob.core.windows.net/${{ env.CONTAINER_NAME }}/${{ env.VHD_DISK_NAME }}
+      - name: Create VM disk from VHD
+        id: create_vm_disk
+        run: |
+          az disk create \
+          --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+          --name ${{ env.VHD_DISK_NAME }} \
+          --source https://${{ env.STORAGE_ACCOUNT_NAME }}.blob.core.windows.net/${{ env.CONTAINER_NAME }}/${{ env.VHD_DISK_NAME }}
 
       - name: Create VM
         id: create_vm
@@ -168,14 +155,6 @@ jobs:
           --attach-os-disk ${{ env.VHD_DISK_NAME }} \
           --os-type linux
 
-      - name: Open VM SSH port
-        id: open_vm_ssh_port
-        run: |
-          az vm open-port \
-          --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-          --name ${{ env.VM_NAME }} \
-          --port 22
-
       - name: Run CIS Rocky Linux tests
         id: cis_tests
         run: |
@@ -185,25 +164,24 @@ jobs:
             --show-details \
             --query publicIps \
             --output tsv)
-          ssh-keyscan -H -t rsa ${PUBLIC_IP}  >> ~/.ssh/known_hosts
           ssh -i ~/.ssh/id_rsa ${{ env.VM_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
 
-      # - name: Shutdown and dismantle VM
-      #   id: shutdown_dismantle_vm
-      #   run: |
-      #     az vm deallocate \
-      #       --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-      #       --name ${{ env.VM_NAME }}
-      #     az vm delete \
-      #       --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-      #       --name ${{ env.VM_NAME }} \
-      #       --force-deletion none \
-      #       --yes
+      - name: Shutdown and dismantle VM
+        id: shutdown_dismantle_vm
+        run: |
+          az vm deallocate \
+            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+            --name ${{ env.VM_NAME }}
+          az vm delete \
+            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+            --name ${{ env.VM_NAME }} \
+            --force-deletion none \
+            --yes
 
-      # - name: Delete VM Resource group
-      #   id: delete_vm_rg
-      #   if: always()
-      #   run: |
-      #     az group delete \
-      #       --name ${{ env.RESOURCE_GROUP_NAME }} \
-      #       --yes
+      - name: Delete VM Resource group
+        id: delete_vm_rg
+        if: always()
+        run: |
+          az group delete \
+            --name ${{ env.RESOURCE_GROUP_NAME }} \
+            --yes
