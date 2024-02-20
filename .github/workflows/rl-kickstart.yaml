@@ -73,29 +73,27 @@ jobs:
       - name: Run `packer init`
         id: init_packer
         run: |
-          packer init rocky9qemu.pkr.hcl
+          packer init .
 
       - name: Run `packer validate`
         id: validate_packer
         run: |
-          packer validate rocky9qemu.pkr.hcl
-          # packer validate -var-file="dev.pkrvars.hcl" \
-          #                 -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
-          #                 -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
-          #                 -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
-          #                 -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' .
+          packer validate -var-file="dev.pkrvars.hcl" \
+                          -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
+                          -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
+                          -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
+                          -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' .
 
       - name: Build Image
         id: build_packer_image
         run: |
-          PACKER_LOG=1 packer build rocky9qemu.pkr.hcl 
-          # PACKER_LOG=1 packer build -var-file="dev.pkrvars.hcl" \
-          #              -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
-          #              -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
-          #              -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
-          #              -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
-          #              -debug \
-          #              -force .
+          PACKER_LOG=1 packer build -var-file="dev.pkrvars.hcl" \
+                       -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
+                       -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
+                       -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
+                       -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
+                       -debug \
+                       -force .
 
       - name: Convert disk image to VHD
         id: qcow2_to_vhd
@@ -141,7 +139,8 @@ jobs:
           --container-name ${{ env.CONTAINER_NAME }} \
           --name ${{ env.VHD_DISK_NAME }} \
           --type page \
-          --file ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.VHD_DISK_NAME }}
+          --file ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.VHD_DISK_NAME }} \
+          --overwrite true
 
       - name: Create VM disk from VHD
         id: create_vm_disk

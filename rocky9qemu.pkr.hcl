@@ -1,36 +1,31 @@
 source "qemu" "rl9" {
-  qemuargs = [
-    ["-netdev", "user,id=user.0,",
-      "hostfwd=tcp::{{ .SSHHostPort }}-:22,",
-    ],
-    ["-device", "virtio-net,netdev=user.0"]
-  ]
-  iso_url              = "https://download.rockylinux.org/pub/rocky/9.3/isos/x86_64/Rocky-9.3-x86_64-boot.iso"
-  iso_checksum         = "sha256:eb096f0518e310f722d5ebd4c69f0322df4fc152c6189f93c5c797dc25f3d2e1"
-  iso_target_path      = "iso/Rocky-9.3-x86_64.iso"
-  output_directory     = "output_rl9"
-  shutdown_command     = "echo 'packer' | sudo -S shutdown -P now"
-  shutdown_timeout     = "10m"
-  cpu_model            = "host"
-  memory               = "4096"
-  disk_size            = "40000M"
-  format               = "qcow2"
-  accelerator          = "kvm"
-  communicator         = "ssh"
-  headless             = true
-  display              = "none"
-  http_directory       = "http"
-  ssh_username         = "packer"
-  ssh_password         = "packer"
-  ssh_private_key_file = "ssh/id_rsa" 
-  ssh_timeout          = "40m"
-  ssh_pty              = true
-  vm_name              = "rocky9"
-  net_device           = "virtio-net"
-  disk_interface       = "virtio"
-  boot_wait            = "1s"
-  boot_key_interval    = "1ms"
-  boot_command         = ["<up><tab> inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/packer-Rocky9.cfg<enter><wait3s>"]
+  qemuargs             = var.qemuargs
+  iso_url              = var.iso_url
+  iso_checksum         = var.iso_checksum
+  iso_target_path      = var.iso_target_path
+  output_directory     = var.output_directory
+  shutdown_command     = var.shutdown_command
+  shutdown_timeout     = var.shutdown_timeout
+  cpu_model            = var.cpu_model
+  memory               = var.memory
+  disk_size            = var.disk_size
+  format               = var.format
+  accelerator          = var.accelerator
+  communicator         = var.communicator
+  headless             = var.headless
+  display              = var.display
+  http_directory       = var.http_directory
+  ssh_username         = var.ssh_username
+  ssh_password         = var.ssh_password
+  ssh_private_key_file = var.ssh_private_key_file
+  ssh_timeout          = var.ssh_timeout
+  ssh_pty              = var.ssh_pty
+  vm_name              = var.vm_name
+  net_device           = var.net_device
+  disk_interface       = var.disk_interface
+  boot_wait            = var.boot_wait
+  boot_key_interval    = var.boot_key_interval
+  boot_command         = var.boot_command
 }
 
 build {
