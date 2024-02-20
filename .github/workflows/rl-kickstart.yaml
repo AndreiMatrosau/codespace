@@ -158,13 +158,15 @@ jobs:
       - name: Run CIS Rocky Linux tests
         id: cis_tests
         run: |
+          echo "${{ secrets.SSH_PACKER_PRIVATE_KEY }}" > id_rsa
+          chmod 600 id_rsa
           PUBLIC_IP=$(az vm show \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
             --name ${{ env.VM_NAME }} \
             --show-details \
             --query publicIps \
             --output tsv)
-          ssh -i ~/.ssh/id_rsa ${{ env.VM_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
+          ssh -i id_rsa ${{ env.VM_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
 
       - name: Shutdown and dismantle VM
         id: shutdown_dismantle_vm
