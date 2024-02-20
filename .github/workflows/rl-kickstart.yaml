@@ -11,9 +11,9 @@ env:
   RESOURCE_GROUP_NAME: ${{ vars.RESOURCE_GROUP_NAME }}
   LOCATION: ${{ vars.LOCATION }}
   VM_NAME: ${{ vars.VM_NAME }}
-  VHD_DISK_NAME: ${{ vars.VHD_DISK_NAME }}
-  QCOW2_DISK_NAME: ${{ vars.QCOW2_DISK_NAME }}
   VM_USER_NAME: ${{ vars.VM_USER_NAME }}
+  QCOW2_DISK_NAME: ${{ vars.QCOW2_DISK_NAME }}
+  VHD_DISK_NAME: ${{ vars.VHD_DISK_NAME }}
   STORAGE_ACCOUNT_NAME: ${{ vars.STORAGE_ACCOUNT_NAME }}
   STORAGE_ACCOUNT_SKU: ${{ vars.STORAGE_ACCOUNT_SKU }}
   CONTAINER_NAME: ${{ vars.CONTAINER_NAME }}
@@ -105,20 +105,6 @@ jobs:
           ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.QCOW2_DISK_NAME }} ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.VHD_DISK_NAME }} \
           -p          
 
-  run_vm_custom_image:
-    runs-on: ubuntu-22.04
-    needs: [build_packer_image]
-
-    steps: 
-      - name: Checkout Repository
-        id: checkout
-        uses: actions/checkout@v4
-
-      - name: Login to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
       - name: Create VM Resource group
         id: create_vm_resource_group
         run: |
@@ -127,7 +113,7 @@ jobs:
           --location ${{ env.LOCATION }}
 
       - name: Create storage account
-        id: create_vhd_sa
+        id: create_vhd_storage_account
         run: |
           az storage account create \
           --name ${{ env.STORAGE_ACCOUNT_NAME }} \
@@ -145,6 +131,8 @@ jobs:
       - name: Upload VHD to storage account
         id: upload_vhd
         run: |
+          ls ${{ env.QEMU_IMAGE_OUTPUT_DIR }}
+          echo "----------"
           az storage blob upload \
           --account-name ${{ env.STORAGE_ACCOUNT_NAME }} \
           --container-name ${{ env.CONTAINER_NAME }} \
@@ -188,7 +176,7 @@ jobs:
             --query publicIps \
             --output tsv)
           ssh-keyscan -H -t rsa ${PUBLIC_IP}  >> ~/.ssh/known_hosts
-          ssh -i ~/.ssh/id_rsa ${{ vars.VM_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
+          ssh -i ~/.ssh/id_rsa ${{ env.VM_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
 
       - name: Shutdown and dismantle VM
         id: shutdown_dismantle_vm
