@@ -30,6 +30,7 @@ env:
 jobs:
   kickstart:
     runs-on: ubuntu-22.04
+    environment: ${{ inputs.stage || 'dev' }}
 
     steps:
       - name: Checkout Repository
