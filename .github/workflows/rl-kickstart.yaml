@@ -1,10 +1,18 @@
 name: CIS tests with Packer Azure VM Image
 
 on:
-  repository_dispatch:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: "Deployment Stage"
+        required: true
+        type: choice
+        options:
+          - "dev"
+          - "prod"
+  # push:
+  #   branches:
+  #     - main
 
 env:
   PRODUCT_VERSION: ${{ vars.PRODUCT_VERSION }}
@@ -46,23 +54,6 @@ jobs:
 
       #     echo "::set-output name=docs_changed::$HasDiff"
 
-      - name: Install KVM virtualization
-        id: install_kvm
-        run: |
-          sudo apt-get update
-          sudo apt-get install qemu qemu-kvm libvirt-daemon-system -y
-          sudo apt-get install libvirt-clients virt-manager bridge-utils -y
-          sudo usermod -aG kvm $USER
-          sudo addgroup libvirtd
-          sudo usermod -aG libvirtd $USER
-          sudo adduser $USER libvirt
-          ls -ld /dev/kvm
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660"' | sudo tee /etc/udev/rules.d/99-kvm.rules
-          sudo udevadm control --reload-rules
-          sudo systemctl restart libvirtd
-          sudo chmod 666 /dev/kvm
-          export DISPLAY=
-
       - name: Set up Packer
         id: setup_packer
         # if: steps.check_file_changed.outputs.docs_changed == 'True'
@@ -95,9 +86,27 @@ jobs:
                        -debug \
                        -force .
 
+      - name: Install KVM virtualization
+        id: install_kvm
+        run: |
+          sudo apt-get update
+          sudo apt-get install qemu qemu-kvm libvirt-daemon-system -y
+          sudo apt-get install libvirt-clients virt-manager bridge-utils -y
+          sudo usermod -aG kvm $USER
+          sudo addgroup libvirtd
+          sudo usermod -aG libvirtd $USER
+          sudo adduser $USER libvirt
+          ls -ld /dev/kvm
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660"' | sudo tee /etc/udev/rules.d/99-kvm.rules
+          sudo udevadm control --reload-rules
+          sudo systemctl restart libvirtd
+          sudo chmod 666 /dev/kvm
+          export DISPLAY=
+
       - name: Convert disk image to VHD
         id: qcow2_to_vhd
         run: |
+          ls ${{ env.QEMU_IMAGE_OUTPUT_DIR }}
           qemu-img convert \
           -f qcow2 \
           -o subformat=fixed,force_size \
