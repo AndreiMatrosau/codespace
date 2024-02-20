@@ -1,4 +1,4 @@
-name: CIS tests with Packer Azure VM Image
+name: Kickstart Azure VM Rocky9
 
 on:
   workflow_dispatch:
@@ -141,8 +141,6 @@ jobs:
       - name: Upload VHD to storage account
         id: upload_vhd
         run: |
-          ls ${{ env.QEMU_IMAGE_OUTPUT_DIR }}
-          echo "----------"
           az storage blob upload \
           --account-name ${{ env.STORAGE_ACCOUNT_NAME }} \
           --container-name ${{ env.CONTAINER_NAME }} \
@@ -168,8 +166,7 @@ jobs:
           --name ${{ env.VM_NAME }} \
           --size Standard_DS2_v2 \
           --attach-os-disk ${{ env.VHD_DISK_NAME }} \
-          --os-type linux \
-          --generate-ssh-keys
+          --os-type linux
 
       - name: Open VM SSH port
         id: open_vm_ssh_port
