@@ -27,4 +27,36 @@ az disk create --name rockyLinuxDisk --resource-group rg-packer --source https:/
 az vm create --resource-group rg-packer --location eastus --name rockylinux9 --attach-os-disk rockyLinuxDisk --os-type linux
 az ssh vm --resource-group rg-packer --vm-name rockylinux9 --subscription c6a76d9c-0f67-4a42-b2a1-3defb05f2aae
 ```
-
+```bash
+# Linux
+QEMU_PARAM_ACCELERATOR = -enable-kvm
+QEMU_PARAM_UEFI_BIOS = -bios /usr/share/qemu/OVMF.fd
+ 
+# MacOS + Intel CPU
+QEMU_PARAM_ACCELERATOR = -accel hvf
+ 
+# MacOS + Apple Silicon
+QEMU_PARAM_ACCELERATOR = -accel tcg,thread=multi -smp cpus=4,sockets=1,cores=4,threads=1
+ 
+# MacOS 
+QEMU_FOLDER_LINK := $(shell brew --prefix qemu)
+QEMU_FOLDER := $(shell readlink -f ${QEMU_FOLDER_LINK})
+QEMU_PARAM_UEFI_BIOS = -drive if=pflash,format=raw,unit=0,file=${QEMU_FOLDER}/share/qemu/edk2-x86_64-code.fd,readonly=on
+ 
+QEMU_DEFAULT_CMD = qemu-system-x86_64 \
+	-cpu max \
+	${QEMU_PARAM_ACCELERATOR} \
+	-m 2G \
+	-chardev socket,id=chrtpm,path=/tmp/swtpm/swtpm-sock \
+	-tpmdev emulator,id=tpm0,chardev=chrtpm \
+	-device tpm-tis,tpmdev=tpm0 \
+	-device qemu-xhci \
+	-drive format=raw,id=drive1,if=none,file=/tmp/soe.img \
+	-device e1000e,netdev=net0 -netdev user,id=net0,hostfwd=tcp::5555-:22
+ 
+$(QEMU_DEFAULT_CMD) \
+	${QEMU_PARAM_UEFI_BIOS} \
+	-device ide-hd,bootindex=1,drive=drive1 \
+	-drive format=raw,id=drive2,if=none,file=$(BUILD_DIR)/$(SOE_IMAGE) \
+	-device usb-storage,bootindex=2,drive=drive2
+```
