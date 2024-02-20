@@ -1,55 +1,43 @@
-variable "plan_info" {
-  type = object({
-    plan_name      = string
-    plan_product   = string
-    plan_publisher = string
-  })
+variable "qemuargs" {
+  type = list(object({
+    type = string
+    value = list(string)
+  }))
   description = <<EOT
-    Used for creating images from Marketplace images.
-    - plan_name (string)      - The plan name, required.
-    - plan_product (string)   - The plan product, required.
-    - plan_publisher (string) - The plan publisher, required. 
+    Allows complete control over the qemu command line (though not qemu-img).
   EOT
-  default = {
-    plan_name      = "rockylinux-x86_64-9"
-    plan_product   = "rockylinux-x86_64"
-    plan_publisher = "resf"
-  } 
+  default = []
 }
 
-variable "shared_image_gallery_destination" {
-  type = object({
-  #  subscription         = string
-    resource_group       = string
-    gallery_name         = string
-    image_name           = string
-    image_version        = string
-    replication_regions  = list(string)
-    storage_account_type = string
-  })
-  description = <<EOT
-    Publishing a new image version to an existing shared image gallery.
-  #  - subscription (string)          - Sig Destination Subscription
-    - resource_group (string)        - Sig Destination Resource Group
-    - gallery_name (string)          - Sig Destination Gallery Name
-    - image_name (string)            - Sig Destination Image Name
-    - image_version (string)         - Sig Destination Image Version
-    - replication_regions ([]string) - A list of regions to replicate the image version in,
-                                       by default the build location will be used as a replication region.
-    - storage_account_type (string)  - Specify a storage account type for the Shared Image Gallery Image Version.
-                                       Defaults to Standard_LRS.
-  EOT
-}
+variable "iso_url" {}
 
-variable "provisioner_shell" {
-  type = object({
-    scripts = list(string)
-  })
-  description = <<EOT
-    Provisions machines built by Packer using shell scripts.
-    - scripts (list(string)) - An array of scripts to execute.
-  EOT
-  default = {
-    scripts = []
-  }  
-}
+variable "iso_checksum" {}
+
+variable "iso_target_path" {}
+
+variable "output_directory" {}
+
+variable "shutdown_command" {}
+variable "shutdown_timeout" {}
+variable "cpu_model" {}
+variable "memory" {}
+variable "disk_size" {}
+variable "format" {}
+variable "accelerator" {}
+variable "communicator" {}
+variable "headless" {}
+variable "display" {}
+variable "http_directory" {}
+variable "ssh_username" {}
+variable "ssh_password" {}
+variable "ssh_private_key_file" {}
+variable "ssh_timeout" {}
+variable "ssh_pty" {}
+variable "vm_name" {}
+variable "net_device" {}
+variable "disk_interface" {}
+variable "boot_wait" {}
+variable "boot_key_interval" {}
+variable "boot_command" {}
+variable "qemu_version" {}
+variable "qemu_source" {}

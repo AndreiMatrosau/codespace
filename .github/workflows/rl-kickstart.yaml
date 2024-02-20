@@ -73,7 +73,7 @@ jobs:
       - name: Run `packer init`
         id: init_packer
         run: |
-          packer init .
+          packer init rocky9qemu.pkr.hcl
 
       - name: Run `packer validate`
         id: validate_packer
@@ -82,7 +82,7 @@ jobs:
                           -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
                           -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
                           -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
-                          -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' .
+                          -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' rocky9qemu.pkr.hcl
 
       - name: Build Image
         id: build_packer_image
@@ -93,7 +93,7 @@ jobs:
                        -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
                        -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
                        -debug \
-                       -force .
+                       -force rocky9qemu.pkr.hcl
 
       - name: Convert disk image to VHD
         id: qcow2_to_vhd

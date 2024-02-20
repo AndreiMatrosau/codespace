@@ -1,3 +1,14 @@
+qemuargs = [
+  {
+    type = "-netdev",
+    value = ["user,id=user.0,", "hostfwd=tcp::{{ .SSHHostPort }}-:22,"]
+  },
+  {
+    type = "-device",
+    value = ["virtio-net,netdev=user.0"]
+  }
+]
+
 iso_url              = "https://download.rockylinux.org/pub/rocky/9.3/isos/x86_64/Rocky-9.3-x86_64-boot.iso"
 iso_checksum         = "sha256:eb096f0518e310f722d5ebd4c69f0322df4fc152c6189f93c5c797dc25f3d2e1"
 iso_target_path      = "iso/Rocky-9.3-x86_64.iso"
@@ -26,14 +37,3 @@ boot_key_interval    = "1ms"
 boot_command         = ["<up><tab> inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/packer-Rocky9.cfg<enter><wait3s>"]
 qemu_version         = "~> 1"
 qemu_source          = "github.com/hashicorp/qemu"
-
-scripts                           = ["install_ansible.sh"]
-shared_image_gallery_destination  = {
-
-    resource_group       = "rg-packer"
-    gallery_name         = "sig.packer"
-    image_name           = "rl9-X86_64"
-    image_version        = "1.10.0"
-    replication_regions  = ["North Europe"]
-    storage_account_type = "Standard_LRS"
-}
