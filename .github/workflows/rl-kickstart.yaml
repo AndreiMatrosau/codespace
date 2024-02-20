@@ -166,24 +166,25 @@ jobs:
             --show-details \
             --query publicIps \
             --output tsv)
+          echo ${PUBLIC_IP} 
           ssh -i id_rsa ${{ env.VM_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
 
-      - name: Shutdown and dismantle VM
-        id: shutdown_dismantle_vm
-        run: |
-          az vm deallocate \
-            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-            --name ${{ env.VM_NAME }}
-          az vm delete \
-            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-            --name ${{ env.VM_NAME }} \
-            --force-deletion none \
-            --yes
+      # - name: Shutdown and dismantle VM
+      #   id: shutdown_dismantle_vm
+      #   run: |
+      #     az vm deallocate \
+      #       --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+      #       --name ${{ env.VM_NAME }}
+      #     az vm delete \
+      #       --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+      #       --name ${{ env.VM_NAME }} \
+      #       --force-deletion none \
+      #       --yes
 
-      - name: Delete VM Resource group
-        id: delete_vm_rg
-        if: always()
-        run: |
-          az group delete \
-            --name ${{ env.RESOURCE_GROUP_NAME }} \
-            --yes
+      # - name: Delete VM Resource group
+      #   id: delete_vm_rg
+      #   if: always()
+      #   run: |
+      #     az group delete \
+      #       --name ${{ env.RESOURCE_GROUP_NAME }} \
+      #       --yes
