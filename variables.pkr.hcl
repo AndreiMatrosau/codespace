@@ -50,9 +50,9 @@ variable "cpu_model" {
 }
 
 variable "memory" {
-  type        = int
+  type        = string
   description = "The amount of memory to use when building the VM in megabytes."
-  default     = 4096
+  default     = "4096"
 }
 
 variable "disk_size" {
