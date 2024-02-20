@@ -140,12 +140,12 @@ jobs:
           --type page \
           --file ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.VHD_DISK_NAME }}
 
-      - name: Create disk from VHD
+      - name: Create VM disk from VHD
         id: create_vm_disk
         run: |
           az disk create \
           --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-          --name ${{ env.VM_DISK_NAME }} \
+          --name ${{ env.VHD_DISK_NAME }} \
           --source https://${{ env.STORAGE_ACCOUNT_NAME }}.blob.core.windows.net/${{ env.CONTAINER_NAME }}/${{ env.VHD_DISK_NAME }}
 
       - name: Create VM
@@ -178,22 +178,22 @@ jobs:
           ssh-keyscan -H -t rsa ${PUBLIC_IP}  >> ~/.ssh/known_hosts
           ssh -i ~/.ssh/id_rsa ${{ env.VM_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
 
-      - name: Shutdown and dismantle VM
-        id: shutdown_dismantle_vm
-        run: |
-          az vm deallocate \
-            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-            --name ${{ env.VM_NAME }}
-          az vm delete \
-            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-            --name ${{ env.VM_NAME }} \
-            --force-deletion none \
-            --yes
+      # - name: Shutdown and dismantle VM
+      #   id: shutdown_dismantle_vm
+      #   run: |
+      #     az vm deallocate \
+      #       --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+      #       --name ${{ env.VM_NAME }}
+      #     az vm delete \
+      #       --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+      #       --name ${{ env.VM_NAME }} \
+      #       --force-deletion none \
+      #       --yes
 
-      - name: Delete VM Resource group
-        id: delete_vm_rg
-        if: always()
-        run: |
-          az group delete \
-            --name ${{ env.RESOURCE_GROUP_NAME }} \
-            --yes
+      # - name: Delete VM Resource group
+      #   id: delete_vm_rg
+      #   if: always()
+      #   run: |
+      #     az group delete \
+      #       --name ${{ env.RESOURCE_GROUP_NAME }} \
+      #       --yes
