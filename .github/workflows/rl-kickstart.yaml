@@ -60,7 +60,6 @@ jobs:
 
       - name: Set up Packer
         id: setup_packer
-        # if: steps.check_file_changed.outputs.docs_changed == 'True'
         uses: hashicorp/setup-packer@main
         with:
           version: ${{ env.PRODUCT_VERSION }}
