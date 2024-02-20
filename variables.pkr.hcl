@@ -23,7 +23,7 @@ variable "subscription_id" {
 }
 
 variable "qemuargs" {
-  type = list(string)
+  type = list(list(string))
   description = <<EOT
     Allows complete control over the qemu command line (though not qemu-img).
   EOT
