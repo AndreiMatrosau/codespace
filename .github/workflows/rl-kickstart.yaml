@@ -121,7 +121,8 @@ jobs:
           --name ${{ env.STORAGE_ACCOUNT_NAME }} \
           --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
           --location ${{ env.LOCATION }} \
-          --sku ${{ env.STORAGE_ACCOUNT_SKU }}
+          --sku ${{ env.STORAGE_ACCOUNT_SKU }} \
+          --allow-blob-public-access true
     
       - name: Create container
         id: create_vhd_container

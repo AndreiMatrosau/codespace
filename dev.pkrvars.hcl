@@ -35,5 +35,3 @@ disk_interface       = "virtio"
 boot_wait            = "1s"
 boot_key_interval    = "1ms"
 boot_command         = ["<up><tab> inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/packer-Rocky9.cfg<enter><wait3s>"]
-qemu_version         = "~> 1"
-qemu_source          = "github.com/hashicorp/qemu"
