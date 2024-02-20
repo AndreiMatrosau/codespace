@@ -16,7 +16,7 @@ variable "iso_url" {
 
 variable "iso_checksum" {
   type        = string
-  description = "The checksum for the ISO file or virtual hard drive file.
+  description = "The checksum for the ISO file or virtual hard drive file."
 }
 
 variable "iso_target_path" {
@@ -40,7 +40,7 @@ variable "shutdown_command" {
 variable "shutdown_timeout" {
   type        = string
   description = "The amount of time to wait after executing the shutdown_command for the virtual machine to actually shut down."
-  default     = "0h10m0s"
+  default     = "10m"
 }
 
 variable "cpu_model" {
@@ -99,13 +99,12 @@ variable "http_directory" {
 
 variable "ssh_username" {
   type        = string
-  description = 
-  default     =
+  description = "The username to connect to SSH with. Required if using SSH."
 }
 
 variable "ssh_password" {
   type        = string
-  description = "The username to connect to SSH with. Required if using SSH."
+  description = "A plaintext password to use to authenticate with SSH."
 }
 
 variable "ssh_private_key_file" {
@@ -128,7 +127,6 @@ variable "ssh_pty" {
 variable "vm_name" {
   type        = string
   description = "This is the name of the image (QCOW2 or IMG) file for the new virtual machine."
-  default     = "rocky9.3"
 }
 
 variable "net_device" {
