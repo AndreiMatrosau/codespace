@@ -136,29 +136,30 @@ jobs:
       #     --file ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.VHD_DISK_NAME }} \
       #     --overwrite true
 
-      - name: Create VM disk from VHD
-        id: create_vm_disk
-        run: |
-          az disk create \
-          --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-          --name ${{ env.VHD_DISK_NAME }} \
-          --source https://${{ env.STORAGE_ACCOUNT_NAME }}.blob.core.windows.net/${{ env.CONTAINER_NAME }}/${{ env.VHD_DISK_NAME }}
+      # - name: Create VM disk from VHD
+      #   id: create_vm_disk
+      #   run: |
+      #     az disk create \
+      #     --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+      #     --name ${{ env.VHD_DISK_NAME }} \
+      #     --source https://${{ env.STORAGE_ACCOUNT_NAME }}.blob.core.windows.net/${{ env.CONTAINER_NAME }}/${{ env.VHD_DISK_NAME }}
 
-      - name: Create VM
-        id: create_vm
-        run: |
-          az vm create \
-          --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-          --location ${{ env.LOCATION }} \
-          --name ${{ env.VM_NAME }} \
-          --size Standard_DS2_v2 \
-          --attach-os-disk ${{ env.VHD_DISK_NAME }} \
-          --os-type linux
+      # - name: Create VM
+      #   id: create_vm
+      #   run: |
+      #     az vm create \
+      #     --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+      #     --location ${{ env.LOCATION }} \
+      #     --name ${{ env.VM_NAME }} \
+      #     --size Standard_DS2_v2 \
+      #     --attach-os-disk ${{ env.VHD_DISK_NAME }} \
+      #     --os-type linux
 
       - name: Run CIS Rocky Linux tests
         id: cis_tests
         run: |
           echo "${{ secrets.SSH_PACKER_PRIVATE_KEY }}" > id_rsa
+          echo "${{ env.VM_USER_NAME }}"
           chmod 600 id_rsa
           PUBLIC_IP=$(az vm show \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
