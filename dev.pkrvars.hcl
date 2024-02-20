@@ -1,8 +1,35 @@
-managed_image_name                = "rl9-X86_64"
-managed_image_resource_group_name = "rg-packer"
+iso_url              = "https://download.rockylinux.org/pub/rocky/9.3/isos/x86_64/Rocky-9.3-x86_64-boot.iso"
+iso_checksum         = "sha256:eb096f0518e310f722d5ebd4c69f0322df4fc152c6189f93c5c797dc25f3d2e1"
+iso_target_path      = "iso/Rocky-9.3-x86_64.iso"
+output_directory     = "output_rl9"
+shutdown_command     = "echo 'packer' | sudo -S shutdown -P now"
+shutdown_timeout     = "10m"
+cpu_model            = "host"
+memory               = "4096"
+disk_size            = "40000M"
+format               = "qcow2"
+accelerator          = "kvm"
+communicator         = "ssh"
+headless             = true
+display              = "none"
+http_directory       = "http"
+ssh_username         = "packer"
+ssh_password         = "packer"
+ssh_private_key_file = "ssh/id_rsa"
+ssh_timeout          = "40m"
+ssh_pty              = true
+vm_name              = "rocky9"
+net_device           = "virtio-net"
+disk_interface       = "virtio"
+boot_wait            = "1s"
+boot_key_interval    = "1ms"
+boot_command         = ["<up><tab> inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/packer-Rocky9.cfg<enter><wait3s>"]
+qemu_version         = "~> 1"
+qemu_source          = "github.com/hashicorp/qemu"
+
 scripts                           = ["install_ansible.sh"]
 shared_image_gallery_destination  = {
-#    subscription         = "c6a76d9c-0f67-4a42-b2a1-3defb05f2aae"
+
     resource_group       = "rg-packer"
     gallery_name         = "sig.packer"
     image_name           = "rl9-X86_64"
