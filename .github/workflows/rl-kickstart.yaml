@@ -78,22 +78,24 @@ jobs:
       - name: Run `packer validate`
         id: validate_packer
         run: |
-          packer validate -var-file="dev.pkrvars.hcl" \
-                          -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
-                          -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
-                          -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
-                          -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' rocky9qemu.pkr.hcl
+          packer validate rocky9qemu.pkr.hcl
+          # packer validate -var-file="dev.pkrvars.hcl" \
+          #                 -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
+          #                 -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
+          #                 -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
+          #                 -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' .
 
       - name: Build Image
         id: build_packer_image
         run: |
-          PACKER_LOG=1 packer build -var-file="dev.pkrvars.hcl" \
-                       -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
-                       -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
-                       -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
-                       -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
-                       -debug \
-                       -force rocky9qemu.pkr.hcl
+          PACKER_LOG=1 packer build rocky9qemu.pkr.hcl 
+          # PACKER_LOG=1 packer build -var-file="dev.pkrvars.hcl" \
+          #              -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
+          #              -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
+          #              -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
+          #              -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
+          #              -debug \
+          #              -force .
 
       - name: Convert disk image to VHD
         id: qcow2_to_vhd
