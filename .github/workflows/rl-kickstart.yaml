@@ -42,53 +42,55 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # - name: Install KVM virtualization
-      #   id: install_kvm
-      #   run: |
-      #     sudo apt-get update
-      #     sudo apt-get install qemu qemu-kvm libvirt-daemon-system -y
-      #     sudo apt-get install libvirt-clients virt-manager bridge-utils -y
-      #     sudo usermod -aG kvm $USER
-      #     sudo addgroup libvirtd
-      #     sudo usermod -aG libvirtd $USER
-      #     sudo adduser $USER libvirt
-      #     ls -ld /dev/kvm
-      #     echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660"' | sudo tee /etc/udev/rules.d/99-kvm.rules
-      #     sudo udevadm control --reload-rules
-      #     sudo systemctl restart libvirtd
-      #     sudo chmod 666 /dev/kvm
-      #     export DISPLAY=
+      - name: Install KVM virtualization
+        id: install_kvm
+        run: |
+          sudo apt-get update
+          sudo apt-get install qemu qemu-kvm libvirt-daemon-system -y
+          sudo apt-get install libvirt-clients virt-manager bridge-utils -y
+          sudo usermod -aG kvm $USER
+          sudo addgroup libvirtd
+          sudo usermod -aG libvirtd $USER
+          sudo adduser $USER libvirt
+          ls -ld /dev/kvm
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660"' | sudo tee /etc/udev/rules.d/99-kvm.rules
+          sudo udevadm control --reload-rules
+          sudo systemctl restart libvirtd
+          sudo chmod 666 /dev/kvm
+          export DISPLAY=
 
-      # - name: Set up Packer
-      #   id: setup_packer
-      #   uses: hashicorp/setup-packer@main
-      #   with:
-      #     version: ${{ env.PRODUCT_VERSION }}
+      - name: Set up Packer
+        id: setup_packer
+        uses: hashicorp/setup-packer@main
+        with:
+          version: ${{ env.PRODUCT_VERSION }}
 
-      # - name: Run `packer init`
-      #   id: init_packer
-      #   run: |
-      #     packer init .
+      - name: Run `packer init`
+        id: init_packer
+        run: |
+          packer init .
 
-      # - name: Run `packer validate`
-      #   id: validate_packer
-      #   run: |
-      #     packer validate -var-file="dev.pkrvars.hcl" \
-      #                     -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
-      #                     -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
-      #                     -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
-      #                     -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' .
+      - name: Run `packer validate`
+        id: validate_packer
+        run: |
+          packer validate rocky9qemu.pkr.hcl
+          # packer validate -var-file="dev.pkrvars.hcl" \
+          #                 -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
+          #                 -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
+          #                 -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
+          #                 -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' .
 
-      # - name: Build Image
-      #   id: build_packer_image
-      #   run: |
-      #     PACKER_LOG=1 packer build -var-file="dev.pkrvars.hcl" \
-      #                  -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
-      #                  -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
-      #                  -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
-      #                  -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
-      #                  -debug \
-      #                  -force .
+      - name: Build Image
+        id: build_packer_image
+        run: |
+          PACKER_LOF=1 packer build -debug -force rocky9qemu.pkr.hcl 
+          # PACKER_LOG=1 packer build -var-file="dev.pkrvars.hcl" \
+          #              -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
+          #              -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
+          #              -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
+          #              -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
+          #              -debug \
+          #              -force .
 
       # - name: Convert disk image to VHD
       #   id: qcow2_to_vhd

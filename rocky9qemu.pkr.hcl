@@ -1,31 +1,40 @@
 source "qemu" "rl9" {
-  qemuargs             = var.qemuargs
-  iso_url              = var.iso_url
-  iso_checksum         = var.iso_checksum
-  iso_target_path      = var.iso_target_path
-  output_directory     = var.output_directory
-  shutdown_command     = var.shutdown_command
-  shutdown_timeout     = var.shutdown_timeout
-  cpu_model            = var.cpu_model
-  memory               = var.memory
-  disk_size            = var.disk_size
-  format               = var.format
-  accelerator          = var.accelerator
-  communicator         = var.communicator
-  headless             = var.headless
-  display              = var.display
-  http_directory       = var.http_directory
-  ssh_username         = var.ssh_username
-  ssh_password         = var.ssh_password
-  ssh_private_key_file = var.ssh_private_key_file
-  ssh_timeout          = var.ssh_timeout
-  ssh_pty              = var.ssh_pty
-  vm_name              = var.vm_name
-  net_device           = var.net_device
-  disk_interface       = var.disk_interface
-  boot_wait            = var.boot_wait
-  boot_key_interval    = var.boot_key_interval
-  boot_command         = var.boot_command
+  qemuargs             = [
+    ["-netdev", "user,id=user.0,",
+      "hostfwd=tcp::{{ .SSHHostPort }}-:22,",
+    ],
+    ["-device", "virtio-net,netdev=user.0"]
+  ]
+  efi_boot             = true
+  efi_firmware_code    = "/usr/share/OVMF/OVMF_CODE.fd"
+  efi_firmware_vars    = "/usr/share/OVMF/OVMF_VARS.fd"
+  // machine_type         = "q35"
+  iso_url              = "https://download.rockylinux.org/pub/rocky/9.3/isos/x86_64/Rocky-9.3-x86_64-boot.iso"
+  iso_checksum         = "sha256:eb096f0518e310f722d5ebd4c69f0322df4fc152c6189f93c5c797dc25f3d2e1"
+  iso_target_path      = "iso/Rocky-9.3-test-x86_64.iso"
+  output_directory     = "output"
+  shutdown_command     = "echo 'packer' | sudo -S shutdown -P now"
+  shutdown_timeout     = "1m"
+  cpu_model            = "host"
+  memory               = "4096"
+  disk_size            = "30720M"
+  format               = "qcow2"
+  accelerator          = "kvm"
+  communicator         = "ssh"
+  headless             = true
+  display              = "none"
+  http_directory       = "http"
+  ssh_username         = "root"
+  ssh_password         = "azureUser123"
+  // ssh_private_key_file = "ssh/ed215"
+  ssh_timeout          = "40m"
+  ssh_pty              = true
+  vm_name              = "rocky9.3"
+  net_device           = "virtio-net"
+  disk_interface       = "virtio"
+  boot_wait            = "5s"
+  boot_key_interval    = "5ms"
+  boot_command         = ["e<down><down><end><bs><bs><bs><bs><bs>inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/packer-Rocky9.cfg.cfg<leftCtrlOn>x<leftCtrlOff><wait3s>"]
 }
 
 build {
