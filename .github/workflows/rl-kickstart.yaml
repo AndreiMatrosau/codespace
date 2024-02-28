@@ -174,13 +174,12 @@ jobs:
       - name: Convert Image to VHD
         id: convert_image_to_vhd
         run: |
-          ls -l ${{ env.QEMU_IMAGE_OUTPUT_DIR }}
-          echo "*******************"
+          cd ${{ env.QEMU_IMAGE_OUTPUT_DIR }}
           qemu-img convert \
             -f qcow2 \
             -o subformat=fixed,force_size \
             -S 0 \
-            -O vpc ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.QCOW2_DISK_NAME }} ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.VHD_DISK_NAME }} \
+            -O vpc ${{ env.QCOW2_DISK_NAME }} ${{ env.VHD_DISK_NAME }} \
             -p
 
       - name: Upload VHD to Storage Account
