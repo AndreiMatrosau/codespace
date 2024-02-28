@@ -108,7 +108,7 @@ jobs:
 
   build_packer_image:
     runs-on: ubuntu-20.04
-    # needs: [create_infrastrucutre]
+    needs: [create_infrastrucutre]
 
     steps:
       - name: Checkout Repository
@@ -196,58 +196,58 @@ jobs:
             --type page \
             --overwrite true
 
-  # run_vm_custom_image:
-  #   runs-on: ubuntu-20.04
-  #   needs: [build_packer_image]
+  run_vm_custom_image:
+    runs-on: ubuntu-20.04
+    needs: [build_packer_image]
 
-  #   steps: 
-  #     - name: Checkout Repository
-  #       id: checkout
-  #       uses: actions/checkout@v4
+    steps: 
+      - name: Checkout Repository
+        id: checkout
+        uses: actions/checkout@v4
 
-  #     - name: Login to Azure
-  #       uses: azure/login@v1
-  #       with:
-  #         creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-  #     - name: Create VM
-  #       id: create_vm
-  #       run: |
-  #         IMAGE_ID=$(az sig image-definition list \
-  #           --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-  #           --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
-  #           --query "[].[id]" \
-  #           --output tsv)
-  #         echo ${IMAGE_ID}
-  #         az vm create \
-  #           --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-  #           --location ${{ env.LOCATION }} \
-  #           --name ${{ env.VM_NAME }} \
-  #           --image ${IMAGE_ID}
+      - name: Create VM
+        id: create_vm
+        run: |
+          IMAGE_ID=$(az sig image-definition list \
+            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+            --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
+            --query "[].[id]" \
+            --output tsv)
+          echo ${IMAGE_ID}
+          az vm create \
+            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+            --location ${{ env.LOCATION }} \
+            --name ${{ env.VM_NAME }} \
+            --image ${IMAGE_ID}
 
-  #     - name: Run CIS Rocky Linux tests
-  #       id: cis_tests
-  #       run: |
-  #         PUBLIC_IP=$(az vm show \
-  #           --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-  #           --name ${{ env.VM_NAME }} \
-  #           --show-details \
-  #           --query publicIps \
-  #           --output tsv)
-  #         ssh-keyscan -H -t rsa ${PUBLIC_IP}  >> ~/.ssh/known_hosts
-  #         ssh -i ~/.ssh/id_rsa ${{ vars.VM_ADMIN_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
+      - name: Run CIS Rocky Linux tests
+        id: cis_tests
+        run: |
+          PUBLIC_IP=$(az vm show \
+            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+            --name ${{ env.VM_NAME }} \
+            --show-details \
+            --query publicIps \
+            --output tsv)
+          ssh-keyscan -H -t rsa ${PUBLIC_IP}  >> ~/.ssh/known_hosts
+          ssh -i ~/.ssh/id_rsa ${{ vars.VM_ADMIN_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
 
-  #     - name: Shutdown and dismantle VM
-  #       id: shutdown_dismantle_vm
-  #       run: |
-  #         az vm deallocate \
-  #           --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-  #           --name ${{ env.VM_NAME }}
-  #         az vm delete \
-  #           --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-  #           --name ${{ env.VM_NAME }} \
-  #           --force-deletion none \
-  #           --yes
+      - name: Shutdown and dismantle VM
+        id: shutdown_dismantle_vm
+        run: |
+          az vm deallocate \
+            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+            --name ${{ env.VM_NAME }}
+          az vm delete \
+            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+            --name ${{ env.VM_NAME }} \
+            --force-deletion none \
+            --yes
 
       - name: Delete VM Resource group
         id: delete_vm_rg
