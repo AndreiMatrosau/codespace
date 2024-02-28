@@ -1,7 +1,15 @@
 name: CIS tests with Packer Azure VM Image
 
 on:
-  repository_dispatch:
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: "Deployment Stage"
+        required: true
+        type: choice
+        options:
+          - "dev"
+          - "prod"
 
 env:
   PRODUCT_VERSION: ${{ vars.PRODUCT_VERSION }}
