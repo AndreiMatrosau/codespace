@@ -10,6 +10,9 @@ on:
         options:
           - "dev"
           - "prod"
+  push:
+    branches:
+      - main
 
 env:
   PRODUCT_VERSION: ${{ vars.PRODUCT_VERSION }}
