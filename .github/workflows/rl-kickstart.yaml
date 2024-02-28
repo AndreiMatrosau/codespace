@@ -28,6 +28,8 @@ env:
   IMAGE_DEFINITION_NAME: ${{ vars.IMAGE_DEFINITION_NAME }}
   COMPUTE_GALLERY_RESOURCE_GROUP_NAME: ${{ vars.COMPUTE_GALLERY_RESOURCE_GROUP_NAME }}
   QEMU_IMAGE_OUTPUT_DIR: ${{ vars.QEMU_IMAGE_OUTPUT_DIR }}
+  QCOW2_IMAGE_NAME: ${{ vars.QCOW2_IMAGE_NAME }}
+  VHD_IMAGE_NAME: ${{ vars.VHD_IMAGE_NAME }}
   VM_ADMIN_USER_NAME: ${{ vars.VM_ADMIN_USER_NAME }}
 
 jobs:
@@ -179,9 +181,9 @@ jobs:
             -f qcow2 \
             -o subformat=fixed,force_size \
             -S 0 \
-            -O vpc ${{ env.QCOW2_DISK_NAME }} ${{ env.VHD_DISK_NAME }} \
+            -O vpc ${{ env.QCOW2_IMAGE_NAME }} ${{ env.VHD_IMAGE_NAME }} \
             -p
-            
+
 
       - name: Upload VHD to Storage Account
         id: upload_vhd_to_storage_account
@@ -189,8 +191,8 @@ jobs:
           az storage blob upload \
             --account-name ${{ env.STORAGE_ACCOUNT_NAME }} \
             --container-name ${{ env.CONTAINER_NAME }} \
-            --name ${{ env.VHD_DISK_NAME }} \
-            --file ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.VHD_DISK_NAME }} \
+            --name ${{ env.VHD_IMAGE_NAME }} \
+            --file ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.VHD_IMAGE_NAME }} \
             --type page \
             --overwrite true
 
@@ -223,6 +225,7 @@ jobs:
   #           --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
   #           --query "[].[id]" \
   #           --output tsv)
+  #         echo ${IMAGE_ID}
   #         az vm create \
   #           --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
   #           --location ${{ env.LOCATION }} \
