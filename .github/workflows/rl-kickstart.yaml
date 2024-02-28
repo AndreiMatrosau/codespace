@@ -177,7 +177,6 @@ jobs:
         ls -l ${{ env.QCOW2_DISK_NAME }}
         ls -l ${{ env.QEMU_IMAGE_OUTPUT_DIR }}
         echo "*******************"
-
          qemu-img convert \
            -f qcow2 \
            -o subformat=fixed,force_size \
