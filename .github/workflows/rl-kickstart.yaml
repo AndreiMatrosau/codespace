@@ -41,15 +41,17 @@ jobs:
       - name: Cleanup Github Runner
         id: runner_cleanup
         run: |
-          du -h
-          # sudo rm -rf /usr/share/dotnet
-          # sudo rm -rf /opt/ghc
-          # sudo rm -rf "/usr/local/share/boost"
+          df -h
+          echo "++++++++++++++++++++++"
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
           sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-          # sudo apt-get clean
-          # sudo apt-get autoclean
-          du -h
-          
+          sudo apt-get clean
+          sudo apt-get autoclean
+          echo "++++++++++++++++++++++"
+          df -h
+
       - name: Checkout Repository
         id: checkout
         uses: actions/checkout@v4
