@@ -109,72 +109,75 @@ jobs:
     # needs: [create_infrastrucutre]
 
     steps:
-      # - name: Checkout Repository
-      #   id: checkout
-      #   uses: actions/checkout@v4
+      - name: Checkout Repository
+        id: checkout
+        uses: actions/checkout@v4
 
-      # - name: Login to Azure
-      #   uses: azure/login@v1
-      #   with:
-      #     creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # - name: Install KVM virtualization
-      #   id: install_kvm
-      #   run: |
-      #     sudo apt-get update
-      #     sudo apt-get install qemu qemu-kvm libvirt-daemon-system -y
-      #     sudo apt-get install libvirt-clients virt-manager bridge-utils -y
-      #     sudo usermod -aG kvm $USER
-      #     sudo chmod 666 /dev/kvm
-      #     sudo addgroup libvirtd
-      #     sudo usermod -aG libvirtd $USER
-      #     sudo adduser $USER libvirt
-      #     echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660"' | sudo tee /etc/udev/rules.d/99-kvm.rules
-      #     sudo udevadm control --reload-rules
-      #     sudo systemctl restart libvirtd
-      #     export DISPLAY=
+      - name: Install KVM virtualization
+        id: install_kvm
+        run: |
+          sudo apt-get update
+          sudo apt-get install qemu qemu-kvm libvirt-daemon-system -y
+          sudo apt-get install libvirt-clients virt-manager bridge-utils -y
+          sudo usermod -aG kvm $USER
+          sudo chmod 666 /dev/kvm
+          sudo addgroup libvirtd
+          sudo usermod -aG libvirtd $USER
+          sudo adduser $USER libvirt
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660"' | sudo tee /etc/udev/rules.d/99-kvm.rules
+          sudo udevadm control --reload-rules
+          sudo systemctl restart libvirtd
+          export DISPLAY=
 
-      # - name: Set up Packer
-      #   id: setup_packer
-      #   uses: hashicorp/setup-packer@main
-      #   with:
-      #     version: ${{ env.PRODUCT_VERSION }}
+      - name: Set up Packer
+        id: setup_packer
+        uses: hashicorp/setup-packer@main
+        with:
+          version: ${{ env.PRODUCT_VERSION }}
 
-      # - name: Run `packer init`
-      #   id: init_packer
-      #   run: packer init .
+      - name: Run `packer init`
+        id: init_packer
+        run: packer init .
 
-      # - name: Run `packer validate`
-      #   id: validate_packer
-      #   run: |
-      #     echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
-      #     chmod 600 id_rsa
-      #     packer validate -var-file="dev.pkrvars.hcl" \
-      #                     -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
-      #                     -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
-      #                     -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
-      #                     -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
-      #                     -var 'ssh_private_key_file=id_rsa' .
+      - name: Run `packer validate`
+        id: validate_packer
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
+          chmod 600 id_rsa
+          packer validate -var-file="dev.pkrvars.hcl" \
+                          -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
+                          -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
+                          -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
+                          -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
+                          -var 'ssh_private_key_file=id_rsa' .
                           
-      # - name: Build Image
-      #   id: build_packer_image
-      #   run: |
-      #     echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
-      #     chmod 600 id_rsa
-      #     echo "SSH key file contents:"
-      #     cat id_rsa
-      #     PACKER_LOG=1 packer build -var-file="dev.pkrvars.hcl" \
-      #                               -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
-      #                               -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
-      #                               -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
-      #                               -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
-      #                               -var 'ssh_private_key_file=id_rsa' \
-      #                               -force .
+      - name: Build Image
+        id: build_packer_image
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
+          chmod 600 id_rsa
+          echo "SSH key file contents:"
+          cat id_rsa
+          PACKER_LOG=1 packer build -var-file="dev.pkrvars.hcl" \
+                                    -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
+                                    -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
+                                    -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
+                                    -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
+                                    -var 'ssh_private_key_file=id_rsa' \
+                                    -force .
 
       - name: Convert Image to VHD
         id: convert_image_to_vhd
         run: |
         ls -l ${{ env.QCOW2_DISK_NAME }}
+        ls -l ${{ env.QEMU_IMAGE_OUTPUT_DIR }}
+        echo "*******************"
+
          qemu-img convert \
            -f qcow2 \
            -o subformat=fixed,force_size \
