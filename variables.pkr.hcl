@@ -149,7 +149,7 @@ variable "ssh_password" {
 variable "ssh_private_key_file" {
   type        = string
   description = "Path to a PEM encoded private key file to use to authenticate with SSH."
-  sensitive   = true
+  sensitive   = false
 }
 
 variable "ssh_timeout" {
