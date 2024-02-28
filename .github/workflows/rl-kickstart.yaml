@@ -1,36 +1,26 @@
-name: Kickstart Azure VM Rocky9
+name: CIS tests with Packer Azure VM Image
 
 on:
-  workflow_dispatch:
-    inputs:
-      stage:
-        description: "Deployment Stage"
-        required: true
-        type: choice
-        options:
-          - "dev"
-          - "prod"
-  # push:
-  #   branches:
-  #     - main
+  repository_dispatch:
 
 env:
   PRODUCT_VERSION: ${{ vars.PRODUCT_VERSION }}
   RESOURCE_GROUP_NAME: ${{ vars.RESOURCE_GROUP_NAME }}
   LOCATION: ${{ vars.LOCATION }}
   VM_NAME: ${{ vars.VM_NAME }}
-  VM_USER_NAME: ${{ vars.VM_USER_NAME }}
-  QCOW2_DISK_NAME: ${{ vars.QCOW2_DISK_NAME }}
-  VHD_DISK_NAME: ${{ vars.VHD_DISK_NAME }}
   STORAGE_ACCOUNT_NAME: ${{ vars.STORAGE_ACCOUNT_NAME }}
-  STORAGE_ACCOUNT_SKU: ${{ vars.STORAGE_ACCOUNT_SKU }}
   CONTAINER_NAME: ${{ vars.CONTAINER_NAME }}
-  QEMU_IMAGE_OUTPUT_DIR: ${{ vars.QEMU_IMAGE_OUTPUT_DIR }}
+  IMAGE_PUBLISHER: ${{ vars.IMAGE_PUBLISHER }}
+  IMAGE_OFFER: ${{ vars.IMAGE_OFFER }}
+  IMAGE_SKU: ${{ vars.IMAGE_SKU }}
+  COMPUTE_GALLERY_NAME: ${{ vars.COMPUTE_GALLERY_NAME }}
+  IMAGE_DEFINITION_NAME: ${{ vars.IMAGE_DEFINITION_NAME }}
+  COMPUTE_GALLERY_RESOURCE_GROUP_NAME: ${{ vars.COMPUTE_GALLERY_RESOURCE_GROUP_NAME }}
+  VM_ADMIN_USER_NAME: ${{ vars.VM_ADMIN_USER_NAME }}
 
 jobs:
-  kickstart:
-    runs-on: ubuntu-22.04
-    environment: ${{ inputs.stage || 'dev' }}
+  create_infrastrucutre:
+    runs-on: ubuntu-20.04
 
     steps:
       - name: Checkout Repository
@@ -52,136 +42,180 @@ jobs:
           sudo addgroup libvirtd
           sudo usermod -aG libvirtd $USER
           sudo adduser $USER libvirt
-          ls -ld /dev/kvm
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660"' | sudo tee /etc/udev/rules.d/99-kvm.rules
           sudo udevadm control --reload-rules
           sudo systemctl restart libvirtd
-          sudo chmod 666 /dev/kvm
           export DISPLAY=
 
-      - name: Set up Packer
-        id: setup_packer
-        uses: hashicorp/setup-packer@main
-        with:
-          version: ${{ env.PRODUCT_VERSION }}
-
-      - name: Run `packer init`
-        id: init_packer
+      - name: Create Resource Group
+        id: create_resource_group
         run: |
-          packer init .
+          az group create \
+            --name ${{ env.RESOURCE_GROUP_NAME }} \
+            --location ${{ env.LOCATION }}
 
-      - name: Run `packer validate`
-        id: validate_packer
+      - name: Create Storage Account
+        id: create_storage_account
         run: |
-          packer validate rocky9qemu.pkr.hcl
-          # packer validate -var-file="dev.pkrvars.hcl" \
-          #                 -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
-          #                 -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
-          #                 -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
-          #                 -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' .
-
-      - name: Build Image
-        id: build_packer_image
-        run: |
-          PACKER_LOF=1 packer build -debug -force rocky9qemu.pkr.hcl 
-          # PACKER_LOG=1 packer build -var-file="dev.pkrvars.hcl" \
-          #              -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
-          #              -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
-          #              -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
-          #              -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
-          #              -debug \
-          #              -force .
-
-      # - name: Convert disk image to VHD
-      #   id: qcow2_to_vhd
-      #   run: |
-      #     ls ${{ env.QEMU_IMAGE_OUTPUT_DIR }}
-      #     qemu-img convert \
-      #     -f qcow2 \
-      #     -o subformat=fixed,force_size \
-      #     -O vpc \
-      #     ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.QCOW2_DISK_NAME }} ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.VHD_DISK_NAME }} \
-      #     -p          
-
-      # - name: Create VM Resource group
-      #   id: create_vm_resource_group
-      #   run: |
-      #     az group create \
-      #     --name ${{ env.RESOURCE_GROUP_NAME }} \
-      #     --location ${{ env.LOCATION }}
-
-      # - name: Create storage account
-      #   id: create_vhd_storage_account
-      #   run: |
-      #     az storage account create \
-      #     --name ${{ env.STORAGE_ACCOUNT_NAME }} \
-      #     --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-      #     --location ${{ env.LOCATION }} \
-      #     --sku ${{ env.STORAGE_ACCOUNT_SKU }} \
-      #     --allow-blob-public-access true
-    
-      # - name: Create container
-      #   id: create_vhd_container
-      #   run: |
-      #     az storage container create \
-      #     --name ${{ env.CONTAINER_NAME }} \
-      #     --account-name ${{ env.STORAGE_ACCOUNT_NAME }}
-    
-      # - name: Upload VHD to storage account
-      #   id: upload_vhd
-      #   run: |
-      #     az storage blob upload \
-      #     --account-name ${{ env.STORAGE_ACCOUNT_NAME }} \
-      #     --container-name ${{ env.CONTAINER_NAME }} \
-      #     --name ${{ env.VHD_DISK_NAME }} \
-      #     --type page \
-      #     --file ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.VHD_DISK_NAME }} \
-      #     --overwrite true
-
-      # - name: Create VM disk from VHD
-      #   id: create_vm_disk
-      #   run: |
-      #     az disk create \
-      #     --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-      #     --name ${{ env.VHD_DISK_NAME }} \
-      #     --source https://${{ env.STORAGE_ACCOUNT_NAME }}.blob.core.windows.net/${{ env.CONTAINER_NAME }}/${{ env.VHD_DISK_NAME }}
-
-      # - name: Create VM
-      #   id: create_vm
-      #   run: |
-      #     az vm create \
-      #     --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-      #     --location ${{ env.LOCATION }} \
-      #     --name ${{ env.VM_NAME }} \
-      #     --size Standard_DS2_v2 \
-      #     --attach-os-disk ${{ env.VHD_DISK_NAME }} \
-      #     --os-type linux
-
-      - name: Run CIS Rocky Linux tests
-        id: cis_tests
-        run: |
-          echo "${{ secrets.SSH_PACKER_PRIVATE_KEY }}" > id_rsa
-          chmod 600 id_rsa
-          PUBLIC_IP=$(az vm show \
+          az storage account create \
+            --name ${{ env.STORAGE_ACCOUNT_NAME }} \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-            --name ${{ env.VM_NAME }} \
-            --show-details \
-            --query publicIps \
-            --output tsv)
-          echo ${PUBLIC_IP} 
-          ssh -i id_rsa ${{ env.VM_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
+            --location ${{ env.LOCATION }} \
+            --sku Standard_LRS \
+            --allow-blob-public-access true
+        
+      - name: Create Container
+        id: create_container
+        run: |
+          az storage container create \
+            --name ${{ env.CONTAINER_NAME }} \
+            --account-name ${{ env.STORAGE_ACCOUNT_NAME }}
 
-      # - name: Shutdown and dismantle VM
-      #   id: shutdown_dismantle_vm
-      #   run: |
-      #     az vm deallocate \
-      #       --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-      #       --name ${{ env.VM_NAME }}
-      #     az vm delete \
-      #       --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-      #       --name ${{ env.VM_NAME }} \
-      #       --force-deletion none \
-      #       --yes
+      - name: Create Compute Gallery
+        id: create_compute_gallery
+        run: |
+          az sig create \
+            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+            --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
+            --location ${{ env.LOCATION }}
+
+      - name: Create Image Definition
+        id: create_image_definition
+        run: |
+          az sig image-definition create \
+            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+            --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
+            --gallery-image-definition ${{ env.IMAGE_DEFINITION_NAME }} \
+            --publisher ${{ env.IMAGE_PUBLISHER }} \
+            --offer ${{ env.IMAGE_OFFER }} \
+            --sku ${{ env.IMAGE_SKU }} \
+            --os-type Linux \
+            --os-state specialized
+
+  # build_packer_image:
+  #   runs-on: ubuntu-20.04
+  #   needs: [create_infrastrucutre]
+
+  #   steps:
+  #     - name: Checkout Repository
+  #       id: checkout
+  #       uses: actions/checkout@v4
+
+  #     - name: Login to Azure
+  #       uses: azure/login@v1
+  #       with:
+  #         creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+  #     - name: Set up Packer
+  #       id: setup_packer
+  #       uses: hashicorp/setup-packer@main
+  #       with:
+  #         version: ${{ env.PRODUCT_VERSION }}
+
+  #     - name: Run `packer init`
+  #       id: init_packer
+  #       run: packer init .
+
+  #     - name: Run `packer validate`
+  #       id: validate_packer
+  #       run: |
+  #         packer validate -var-file="dev.pkrvars.hcl" \
+  #                         -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
+  #                         -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
+  #                         -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
+  #                         -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
+  #                         .
+
+  #     - name: Build Image
+  #       id: build_packer_image
+  #       run: |
+  #         packer build -var-file="dev.pkrvars.hcl" \
+  #                      -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
+  #                      -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
+  #                      -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
+  #                      -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
+  #                      -force .
+
+  #     - name: Convert Image to VHD
+  #       id: convert_image_to_vhd
+  #       run: |
+  #        qemu-img convert \
+  #          -f qcow2 \
+  #          -o subformat=fixed,force_size \
+  #          -S 0 \
+  #          -O vpc \
+  #          ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.QCOW2_DISK_NAME }} ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.VHD_DISK_NAME }} \
+  #          -p
+
+  #     - name: Upload VHD to Storage Account
+  #       id: upload_vhd_to_storage_account
+  #       run: |
+  #         az storage blob upload \
+  #           --account-name ${{ env.STORAGE_ACCOUNT_NAME }} \
+  #           --container-name ${{ env.CONTAINER_NAME }} \
+  #           --name ${{ env.VHD_DISK_NAME }} \
+  #           --file ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.VHD_DISK_NAME }} \
+  #           --type page \
+  #           --overwrite true
+
+  # run_vm_custom_image:
+  #   runs-on: ubuntu-20.04
+  #   needs: [build_packer_image]
+
+  #   steps: 
+  #     - name: Checkout Repository
+  #       id: checkout
+  #       uses: actions/checkout@v4
+
+  #     - name: Login to Azure
+  #       uses: azure/login@v1
+  #       with:
+  #         creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+  #     - name: Create VM Resource Group
+  #       id: create_vm_resource_group
+  #       run: |
+  #         az group create \
+  #           --name ${{ env.RESOURCE_GROUP_NAME }} \
+  #           --location ${{ env.LOCATION }}
+
+  #     - name: Create VM
+  #       id: create_vm
+  #       run: |
+  #         IMAGE_ID=$(az sig image-definition list \
+  #           --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+  #           --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
+  #           --query "[].[id]" \
+  #           --output tsv)
+  #         az vm create \
+  #           --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+  #           --location ${{ env.LOCATION }} \
+  #           --name ${{ env.VM_NAME }} \
+  #           --image ${IMAGE_ID}
+
+  #     - name: Run CIS Rocky Linux tests
+  #       id: cis_tests
+  #       run: |
+  #         PUBLIC_IP=$(az vm show \
+  #           --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+  #           --name ${{ env.VM_NAME }} \
+  #           --show-details \
+  #           --query publicIps \
+  #           --output tsv)
+  #         ssh-keyscan -H -t rsa ${PUBLIC_IP}  >> ~/.ssh/known_hosts
+  #         ssh -i ~/.ssh/id_rsa ${{ vars.VM_ADMIN_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
+
+  #     - name: Shutdown and dismantle VM
+  #       id: shutdown_dismantle_vm
+  #       run: |
+  #         az vm deallocate \
+  #           --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+  #           --name ${{ env.VM_NAME }}
+  #         az vm delete \
+  #           --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+  #           --name ${{ env.VM_NAME }} \
+  #           --force-deletion none \
+  #           --yes
 
       # - name: Delete VM Resource group
       #   id: delete_vm_rg

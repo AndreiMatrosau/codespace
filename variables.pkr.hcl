@@ -30,6 +30,24 @@ variable "qemuargs" {
   default = []
 }
 
+variable "efi_boot" {
+  type        = bool
+  description = "Boot in EFI mode instead of BIOS."
+  default     = true
+}
+
+variable "efi_firmware_code" {
+  type        = string
+  description = "Path to the CODE part of OVMF (or other compatible firmwares)."
+  default     = "/usr/share/OVMF/OVMF_CODE.fd"
+}
+
+variable "efi_firmware_vars" {
+  type        = string
+  description = "Path to the VARS corresponding to the OVMF code file."
+  default     = "/usr/share/OVMF/OVMF_VARS.fd"
+}
+
 variable "iso_url" {
   type        = string
   description = "A URL to the ISO containing the installation image or virtual hard drive (VHD or VHDX) file to clone."
@@ -61,7 +79,7 @@ variable "shutdown_command" {
 variable "shutdown_timeout" {
   type        = string
   description = "The amount of time to wait after executing the shutdown_command for the virtual machine to actually shut down."
-  default     = "10m"
+  default     = "1m"
 }
 
 variable "cpu_model" {
@@ -131,6 +149,7 @@ variable "ssh_password" {
 variable "ssh_private_key_file" {
   type        = string
   description = "Path to a PEM encoded private key file to use to authenticate with SSH."
+  sensitive   = true
 }
 
 variable "ssh_timeout" {
@@ -153,7 +172,7 @@ variable "vm_name" {
 variable "net_device" {
   type        = string
   description = "The driver to use for the network interface."
-  default     = "virtio-net"
+  default     = "virtio-net-pci"
 }
 
 variable "disk_interface" {
@@ -165,17 +184,17 @@ variable "disk_interface" {
 variable "boot_wait" {
   type        = string
   description = "The time to wait after booting the initial virtual machine before typing the boot_command."
-  default     = "1s"
+  default     = "10s"
 }
 
 variable "boot_key_interval" {
   type        = string
   description = "Time in ms to wait between each key press."
-  default     = "1ms"
+  default     = "10ms"
 }
 
 variable "boot_command" {
   type        = list(string)
   description = "This is an array of commands to type when the virtual machine is first booted."
-  default     = ["<up><tab> inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/packer-Rocky9.cfg<enter><wait3s>"]
+  default     = ["e<down><down><end><bs><bs><bs><bs><bs>inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/Rocky-9.3.cfg<leftCtrlOn>x<leftCtrlOff><wait3s>"]
 }
