@@ -191,14 +191,14 @@ jobs:
       - name: Cleanup Github Runner
         id: runner_cleanup
         run: |
-          du -h
-          # sudo rm -rf /usr/share/dotnet
-          # sudo rm -rf /opt/ghc
-          # sudo rm -rf "/usr/local/share/boost"
+          df -h
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
           sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-          # sudo apt-get clean
-          # sudo apt-get autoclean
-          du -h
+          sudo apt-get clean
+          sudo apt-get autoclean
+          df -h
 
       - name: Convert Image to VHD
         id: convert_image_to_vhd
@@ -264,7 +264,7 @@ jobs:
             --query publicIps \
             --output tsv)
           ssh-keyscan -H -t rsa ${PUBLIC_IP}  >> ~/.ssh/known_hosts
-          ssh -i ~/.ssh/id_rsa ${{ vars.VM_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
+          ssh -i id_rsa ${{ vars.VM_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
 
       - name: Shutdown and dismantle VM
         id: shutdown_dismantle_vm
@@ -278,10 +278,10 @@ jobs:
             --force-deletion none \
             --yes
 
-      - name: Delete VM Resource group
-        id: delete_vm_rg
-        if: always()
-        run: |
-          az group delete \
-            --name ${{ env.RESOURCE_GROUP_NAME }} \
-            --yes
+      # - name: Delete VM Resource group
+      #   id: delete_vm_rg
+      #   if: always()
+      #   run: |
+      #     az group delete \
+      #       --name ${{ env.RESOURCE_GROUP_NAME }} \
+      #       --yes
