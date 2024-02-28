@@ -130,22 +130,27 @@ jobs:
       - name: Run `packer validate`
         id: validate_packer
         run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
+          chmod 600 id_rsa
           packer validate -var-file="dev.pkrvars.hcl" \
                           -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
                           -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
                           -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
                           -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
-                          .
+                          -var 'ssh_private_key_file=id_rsa' .
 
       - name: Build Image
         id: build_packer_image
         run: |
-          packer build -var-file="dev.pkrvars.hcl" \
-                       -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
-                       -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
-                       -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
-                       -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
-                       -force .
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
+          chmod 600 id_rsa
+          PACKER_LOG=1 packer build -var-file="dev.pkrvars.hcl" \
+                                    -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
+                                    -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
+                                    -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
+                                    -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
+                                    -var 'ssh_private_key_file=id_rsa' \
+                                    -force .
 
       - name: Convert Image to VHD
         id: convert_image_to_vhd
