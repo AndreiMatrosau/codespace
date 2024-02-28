@@ -30,13 +30,26 @@ env:
   QEMU_IMAGE_OUTPUT_DIR: ${{ vars.QEMU_IMAGE_OUTPUT_DIR }}
   QCOW2_IMAGE_NAME: ${{ vars.QCOW2_IMAGE_NAME }}
   VHD_IMAGE_NAME: ${{ vars.VHD_IMAGE_NAME }}
-  VM_ADMIN_USER_NAME: ${{ vars.VM_ADMIN_USER_NAME }}
+  VM_USER_NAME: ${{ vars.VM_USER_NAME }}
 
 jobs:
   create_infrastrucutre:
     runs-on: ubuntu-20.04
 
     steps:
+
+      - name: Cleanup Github Runner
+        id: runner_cleanup
+        run: |
+          du -h
+          # sudo rm -rf /usr/share/dotnet
+          # sudo rm -rf /opt/ghc
+          # sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          # sudo apt-get clean
+          # sudo apt-get autoclean
+          du -h
+          
       - name: Checkout Repository
         id: checkout
         uses: actions/checkout@v4
@@ -173,6 +186,18 @@ jobs:
                                     -var 'ssh_private_key_file=id_rsa' \
                                     -force .
 
+      - name: Cleanup Github Runner
+        id: runner_cleanup
+        run: |
+          du -h
+          # sudo rm -rf /usr/share/dotnet
+          # sudo rm -rf /opt/ghc
+          # sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          # sudo apt-get clean
+          # sudo apt-get autoclean
+          du -h
+
       - name: Convert Image to VHD
         id: convert_image_to_vhd
         run: |
@@ -228,6 +253,8 @@ jobs:
       - name: Run CIS Rocky Linux tests
         id: cis_tests
         run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
+          chmod 600 id_rsa
           PUBLIC_IP=$(az vm show \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
             --name ${{ env.VM_NAME }} \
@@ -235,7 +262,7 @@ jobs:
             --query publicIps \
             --output tsv)
           ssh-keyscan -H -t rsa ${PUBLIC_IP}  >> ~/.ssh/known_hosts
-          ssh -i ~/.ssh/id_rsa ${{ vars.VM_ADMIN_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
+          ssh -i ~/.ssh/id_rsa ${{ vars.VM_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
 
       - name: Shutdown and dismantle VM
         id: shutdown_dismantle_vm
