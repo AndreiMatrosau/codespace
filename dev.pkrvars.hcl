@@ -2,7 +2,7 @@ qemuargs = [
   ["-netdev", "user,id=user.0,",
     "hostfwd=tcp::{{ .SSHHostPort }}-:22,",
   ],
-  ["-device", "virtio-net,netdev=user.0"]
+  ["-device", "virtio-net-pci,netdev=user.0"]
 ]
 
 iso_url              = "https://download.rockylinux.org/pub/rocky/9.3/isos/x86_64/Rocky-9.3-x86_64-boot.iso"
