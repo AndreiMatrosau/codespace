@@ -181,6 +181,7 @@ jobs:
             -S 0 \
             -O vpc ${{ env.QCOW2_DISK_NAME }} ${{ env.VHD_DISK_NAME }} \
             -p
+            
 
       - name: Upload VHD to Storage Account
         id: upload_vhd_to_storage_account
