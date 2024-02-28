@@ -170,19 +170,20 @@ jobs:
                                     -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
                                     -var 'ssh_private_key_file=id_rsa' \
                                     -force .
+
       - name: Convert Image to VHD
         id: convert_image_to_vhd
         run: |
           ls -l ${{ env.QCOW2_DISK_NAME }}
           ls -l ${{ env.QEMU_IMAGE_OUTPUT_DIR }}
           echo "*******************"
-         qemu-img convert \
-           -f qcow2 \
-           -o subformat=fixed,force_size \
-           -S 0 \
-           -O vpc \
-           ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.QCOW2_DISK_NAME }} ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.VHD_DISK_NAME }} \
-           -p
+          qemu-img convert \
+            -f qcow2 \
+            -o subformat=fixed,force_size \
+            -S 0 \
+            -O vpc \
+            ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.QCOW2_DISK_NAME }} ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.VHD_DISK_NAME }} \
+            -p
 
       - name: Upload VHD to Storage Account
         id: upload_vhd_to_storage_account
