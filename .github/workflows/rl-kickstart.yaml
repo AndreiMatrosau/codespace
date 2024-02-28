@@ -138,11 +138,21 @@ jobs:
                           -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
                           -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
                           -var 'ssh_private_key_file=id_rsa' .
-
-      - name: Install QEMU
+                          
+      - name: Install KVM virtualization
+        id: install_kvm
         run: |
           sudo apt-get update
-          sudo apt-get install qemu-kvm qemu virt-manager virt-viewer libvirt-daemon-system libvirt-clients
+          sudo apt-get install qemu qemu-kvm libvirt-daemon-system -y
+          sudo apt-get install libvirt-clients virt-manager bridge-utils -y
+          sudo usermod -aG kvm $USER
+          sudo addgroup libvirtd
+          sudo usermod -aG libvirtd $USER
+          sudo adduser $USER libvirt
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660"' | sudo tee /etc/udev/rules.d/99-kvm.rules
+          sudo udevadm control --reload-rules
+          sudo systemctl restart libvirtd
+          export DISPLAY=
 
       - name: Build Image
         id: build_packer_image
