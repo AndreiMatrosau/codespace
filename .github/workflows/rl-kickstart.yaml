@@ -27,6 +27,7 @@ env:
   COMPUTE_GALLERY_NAME: ${{ vars.COMPUTE_GALLERY_NAME }}
   IMAGE_DEFINITION_NAME: ${{ vars.IMAGE_DEFINITION_NAME }}
   COMPUTE_GALLERY_RESOURCE_GROUP_NAME: ${{ vars.COMPUTE_GALLERY_RESOURCE_GROUP_NAME }}
+  QEMU_IMAGE_OUTPUT_DIR: ${{ vars.QEMU_IMAGE_OUTPUT_DIR }}
   VM_ADMIN_USER_NAME: ${{ vars.VM_ADMIN_USER_NAME }}
 
 jobs:
@@ -117,6 +118,22 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: Install KVM virtualization
+        id: install_kvm
+        run: |
+          sudo apt-get update
+          sudo apt-get install qemu qemu-kvm libvirt-daemon-system -y
+          sudo apt-get install libvirt-clients virt-manager bridge-utils -y
+          sudo usermod -aG kvm $USER
+          sudo chmod 666 /dev/kvm
+          sudo addgroup libvirtd
+          sudo usermod -aG libvirtd $USER
+          sudo adduser $USER libvirt
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660"' | sudo tee /etc/udev/rules.d/99-kvm.rules
+          sudo udevadm control --reload-rules
+          sudo systemctl restart libvirtd
+          export DISPLAY=
+
       - name: Set up Packer
         id: setup_packer
         uses: hashicorp/setup-packer@main
@@ -139,22 +156,6 @@ jobs:
                           -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
                           -var 'ssh_private_key_file=id_rsa' .
                           
-      - name: Install KVM virtualization
-        id: install_kvm
-        run: |
-          sudo apt-get update
-          sudo apt-get install qemu qemu-kvm libvirt-daemon-system -y
-          sudo apt-get install libvirt-clients virt-manager bridge-utils -y
-          sudo usermod -aG kvm $USER
-          sudo chmod 666 /dev/kvm
-          sudo addgroup libvirtd
-          sudo usermod -aG libvirtd $USER
-          sudo adduser $USER libvirt
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660"' | sudo tee /etc/udev/rules.d/99-kvm.rules
-          sudo udevadm control --reload-rules
-          sudo systemctl restart libvirtd
-          export DISPLAY=
-
       - name: Build Image
         id: build_packer_image
         run: |
