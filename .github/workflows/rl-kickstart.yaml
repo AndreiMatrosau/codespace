@@ -30,82 +30,8 @@ env:
   VM_ADMIN_USER_NAME: ${{ vars.VM_ADMIN_USER_NAME }}
 
 jobs:
-  create_infrastrucutre:
-    runs-on: ubuntu-20.04
-
-    steps:
-      - name: Checkout Repository
-        id: checkout
-        uses: actions/checkout@v4
-
-      - name: Login to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Install KVM virtualization
-        id: install_kvm
-        run: |
-          sudo apt-get update
-          sudo apt-get install qemu qemu-kvm libvirt-daemon-system -y
-          sudo apt-get install libvirt-clients virt-manager bridge-utils -y
-          sudo usermod -aG kvm $USER
-          sudo addgroup libvirtd
-          sudo usermod -aG libvirtd $USER
-          sudo adduser $USER libvirt
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660"' | sudo tee /etc/udev/rules.d/99-kvm.rules
-          sudo udevadm control --reload-rules
-          sudo systemctl restart libvirtd
-          export DISPLAY=
-
-      - name: Create Resource Group
-        id: create_resource_group
-        run: |
-          az group create \
-            --name ${{ env.RESOURCE_GROUP_NAME }} \
-            --location ${{ env.LOCATION }}
-
-      - name: Create Storage Account
-        id: create_storage_account
-        run: |
-          az storage account create \
-            --name ${{ env.STORAGE_ACCOUNT_NAME }} \
-            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-            --location ${{ env.LOCATION }} \
-            --sku Standard_LRS \
-            --allow-blob-public-access true
-        
-      - name: Create Container
-        id: create_container
-        run: |
-          az storage container create \
-            --name ${{ env.CONTAINER_NAME }} \
-            --account-name ${{ env.STORAGE_ACCOUNT_NAME }}
-
-      - name: Create Compute Gallery
-        id: create_compute_gallery
-        run: |
-          az sig create \
-            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-            --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
-            --location ${{ env.LOCATION }}
-
-      - name: Create Image Definition
-        id: create_image_definition
-        run: |
-          az sig image-definition create \
-            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-            --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
-            --gallery-image-definition ${{ env.IMAGE_DEFINITION_NAME }} \
-            --publisher ${{ env.IMAGE_PUBLISHER }} \
-            --offer ${{ env.IMAGE_OFFER }} \
-            --sku ${{ env.IMAGE_SKU }} \
-            --os-type Linux \
-            --os-state specialized
-
-  # build_packer_image:
+  # create_infrastrucutre:
   #   runs-on: ubuntu-20.04
-  #   needs: [create_infrastrucutre]
 
   #   steps:
   #     - name: Checkout Repository
@@ -117,57 +43,131 @@ jobs:
   #       with:
   #         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-  #     - name: Set up Packer
-  #       id: setup_packer
-  #       uses: hashicorp/setup-packer@main
-  #       with:
-  #         version: ${{ env.PRODUCT_VERSION }}
-
-  #     - name: Run `packer init`
-  #       id: init_packer
-  #       run: packer init .
-
-  #     - name: Run `packer validate`
-  #       id: validate_packer
+  #     - name: Install KVM virtualization
+  #       id: install_kvm
   #       run: |
-  #         packer validate -var-file="dev.pkrvars.hcl" \
-  #                         -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
-  #                         -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
-  #                         -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
-  #                         -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
-  #                         .
+  #         sudo apt-get update
+  #         sudo apt-get install qemu qemu-kvm libvirt-daemon-system -y
+  #         sudo apt-get install libvirt-clients virt-manager bridge-utils -y
+  #         sudo usermod -aG kvm $USER
+  #         sudo addgroup libvirtd
+  #         sudo usermod -aG libvirtd $USER
+  #         sudo adduser $USER libvirt
+  #         echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660"' | sudo tee /etc/udev/rules.d/99-kvm.rules
+  #         sudo udevadm control --reload-rules
+  #         sudo systemctl restart libvirtd
+  #         export DISPLAY=
 
-  #     - name: Build Image
-  #       id: build_packer_image
+  #     - name: Create Resource Group
+  #       id: create_resource_group
   #       run: |
-  #         packer build -var-file="dev.pkrvars.hcl" \
-  #                      -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
-  #                      -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
-  #                      -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
-  #                      -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
-  #                      -force .
+  #         az group create \
+  #           --name ${{ env.RESOURCE_GROUP_NAME }} \
+  #           --location ${{ env.LOCATION }}
 
-  #     - name: Convert Image to VHD
-  #       id: convert_image_to_vhd
+  #     - name: Create Storage Account
+  #       id: create_storage_account
   #       run: |
-  #        qemu-img convert \
-  #          -f qcow2 \
-  #          -o subformat=fixed,force_size \
-  #          -S 0 \
-  #          -O vpc \
-  #          ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.QCOW2_DISK_NAME }} ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.VHD_DISK_NAME }} \
-  #          -p
+  #         az storage account create \
+  #           --name ${{ env.STORAGE_ACCOUNT_NAME }} \
+  #           --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+  #           --location ${{ env.LOCATION }} \
+  #           --sku Standard_LRS \
+  #           --allow-blob-public-access true
+        
+  #     - name: Create Container
+  #       id: create_container
+  #       run: |
+  #         az storage container create \
+  #           --name ${{ env.CONTAINER_NAME }} \
+  #           --account-name ${{ env.STORAGE_ACCOUNT_NAME }}
 
-  #     - name: Upload VHD to Storage Account
-  #       id: upload_vhd_to_storage_account
+  #     - name: Create Compute Gallery
+  #       id: create_compute_gallery
   #       run: |
-  #         az storage blob upload \
-  #           --account-name ${{ env.STORAGE_ACCOUNT_NAME }} \
-  #           --container-name ${{ env.CONTAINER_NAME }} \
-  #           --name ${{ env.VHD_DISK_NAME }} \
-  #           --file ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.VHD_DISK_NAME }} \
-  #           --type page \
-  #           --overwrite true
+  #         az sig create \
+  #           --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+  #           --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
+  #           --location ${{ env.LOCATION }}
+
+  #     - name: Create Image Definition
+  #       id: create_image_definition
+  #       run: |
+  #         az sig image-definition create \
+  #           --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+  #           --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
+  #           --gallery-image-definition ${{ env.IMAGE_DEFINITION_NAME }} \
+  #           --publisher ${{ env.IMAGE_PUBLISHER }} \
+  #           --offer ${{ env.IMAGE_OFFER }} \
+  #           --sku ${{ env.IMAGE_SKU }} \
+  #           --os-type Linux \
+  #           --os-state specialized
+
+  build_packer_image:
+    runs-on: ubuntu-20.04
+    # needs: [create_infrastrucutre]
+
+    steps:
+      - name: Checkout Repository
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set up Packer
+        id: setup_packer
+        uses: hashicorp/setup-packer@main
+        with:
+          version: ${{ env.PRODUCT_VERSION }}
+
+      - name: Run `packer init`
+        id: init_packer
+        run: packer init .
+
+      - name: Run `packer validate`
+        id: validate_packer
+        run: |
+          packer validate -var-file="dev.pkrvars.hcl" \
+                          -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
+                          -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
+                          -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
+                          -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
+                          .
+
+      - name: Build Image
+        id: build_packer_image
+        run: |
+          packer build -var-file="dev.pkrvars.hcl" \
+                       -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
+                       -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
+                       -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
+                       -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
+                       -force .
+
+      - name: Convert Image to VHD
+        id: convert_image_to_vhd
+        run: |
+         qemu-img convert \
+           -f qcow2 \
+           -o subformat=fixed,force_size \
+           -S 0 \
+           -O vpc \
+           ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.QCOW2_DISK_NAME }} ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.VHD_DISK_NAME }} \
+           -p
+
+      - name: Upload VHD to Storage Account
+        id: upload_vhd_to_storage_account
+        run: |
+          az storage blob upload \
+            --account-name ${{ env.STORAGE_ACCOUNT_NAME }} \
+            --container-name ${{ env.CONTAINER_NAME }} \
+            --name ${{ env.VHD_DISK_NAME }} \
+            --file ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.VHD_DISK_NAME }} \
+            --type page \
+            --overwrite true
 
   # run_vm_custom_image:
   #   runs-on: ubuntu-20.04
