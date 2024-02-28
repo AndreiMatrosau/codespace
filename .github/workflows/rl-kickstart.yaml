@@ -142,7 +142,7 @@ jobs:
       - name: Install QEMU
         run: |
           sudo apt-get update
-          sudo apt-get install qemu-kvm qemu virt-manager virt-viewer libvirt-bin
+          sudo apt-get install qemu-kvm qemu virt-manager virt-viewer libvirt-daemon-system libvirt-clients
 
       - name: Build Image
         id: build_packer_image
