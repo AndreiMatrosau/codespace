@@ -94,8 +94,8 @@ jobs:
   #           --os-state specialized \
   #           --hyper-v-generation V2
 
-  build_packer_image:
-    runs-on: ubuntu-20.04
+  # build_packer_image:
+  #   runs-on: ubuntu-20.04
   #   needs: [create_infrastrucutre]
 
   #   steps:
@@ -191,8 +191,8 @@ jobs:
   #           --type page \
   #           --overwrite true
 
-  # run_vm_custom_image:
-  #   runs-on: ubuntu-20.04
+  run_vm_custom_image:
+    runs-on: ubuntu-20.04
   #   needs: [build_packer_image]
 
   #   steps: 
