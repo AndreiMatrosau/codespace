@@ -125,6 +125,16 @@ jobs:
       - name: Create the image version
         id: create_image_version
         run: |
+          echo "STORAGE_ACCOUNT_ID=$(az storage account show \
+            --name ${{ env.STORAGE_ACCOUNT_NAME }} \
+            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+            --query id \
+            --output tsv)" >> $GITHUB_ENV
+          echo "VHD_URI=$(az storage blob url \
+            --account-name ${{ env.STORAGE_ACCOUNT_NAME }} \
+            --container-name ${{ env.CONTAINER_NAME }} \
+            --name ${{ env.VHD_DISK_NAME }} \
+            --output tsv)" >> $GITHUB_ENV
           az sig image-version create \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
             --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
@@ -132,8 +142,8 @@ jobs:
             --gallery-image-version ${{ env.IMAGE_VERSION }} \
             --target-regions ${{ env.LOCATION }} \
             --replica-count 1 \
-            --managed-image ${{ env.STORAGE_ACCOUNT_NAME }} \
-            --managed-image-rg ${{ env.RESOURCE_GROUP_NAME }}
+            --os-vhd-storage-account ${{ env.STORAGE_ACCOUNT_ID }} \
+            --os-vhd-uri ${{ env.VHD_URI }}
 
   build_packer_image:
     runs-on: ubuntu-20.04
@@ -227,7 +237,6 @@ jobs:
             -O vpc ${{ env.QCOW2_IMAGE_NAME }} ${{ env.VHD_IMAGE_NAME }} \
             -p
 
-
       - name: Upload VHD to Storage Account
         id: upload_vhd_to_storage_account
         run: |
@@ -296,10 +305,37 @@ jobs:
             --force-deletion none \
             --yes
 
-      # - name: Delete VM Resource group
-      #   id: delete_vm_rg
-      #   if: always()
-      #   run: |
-      #     az group delete \
-      #       --name ${{ env.RESOURCE_GROUP_NAME }} \
-      #       --yes
+name: Delete Resource group
+
+on:
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: "Deployment Stage"
+        required: true
+        type: choice
+        options:
+          - "dev"
+          - "prod"
+
+env:
+  RESOURCE_GROUP_NAME: ${{ vars.RESOURCE_GROUP_NAME }}
+
+jobs:
+  create_infrastrucutre:
+    runs-on: ubuntu-20.04
+
+    steps:
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Delete Resource group
+        id: delete_rg
+        # if: always()
+        run: |
+          az group delete \
+            --name ${{ env.RESOURCE_GROUP_NAME }} \
+            --yes
