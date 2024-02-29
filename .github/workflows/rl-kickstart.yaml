@@ -242,8 +242,9 @@ jobs:
             --location ${{ env.LOCATION }} \
             --name ${{ env.VM_NAME }} \
             --image ${IMAGE_ID} \
-            --admin-username ${{ env.VM_USER_NAME }}\
-            --ssh-key-values id_rsa.pub
+            --specialized
+            # --admin-username ${{ env.VM_USER_NAME }} \
+            # --ssh-key-values id_rsa.pub
 
       - name: Run CIS Rocky Linux tests
         id: cis_tests
