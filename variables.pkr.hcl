@@ -97,7 +97,7 @@ variable "memory" {
 variable "disk_size" {
   type        = string
   description = "The size in bytes of the hard disk of the VM."
-  default     = "15360M"
+  default     = "20480M"
 }
 
 variable "format" {
