@@ -35,240 +35,213 @@ env:
   SSH_PUBLIC_KEY: ${{ vars.SSH_PUBLIC_KEY }}
 
 jobs:
-  create_infrastrucutre:
-    runs-on: ubuntu-20.04
+  # create_infrastrucutre:
+  #   runs-on: ubuntu-20.04
 
-    steps:
-      - name: Checkout Repository
-        id: checkout
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout Repository
+  #       id: checkout
+  #       uses: actions/checkout@v4
 
-      - name: Login to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+  #     - name: Login to Azure
+  #       uses: azure/login@v1
+  #       with:
+  #         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Create Resource Group
-        id: create_resource_group
-        run: |
-          az group create \
-            --name ${{ env.RESOURCE_GROUP_NAME }} \
-            --location ${{ env.LOCATION }}
+  #     - name: Create Resource Group
+  #       id: create_resource_group
+  #       run: |
+  #         az group create \
+  #           --name ${{ env.RESOURCE_GROUP_NAME }} \
+  #           --location ${{ env.LOCATION }}
 
-      - name: Create Storage Account
-        id: create_storage_account
-        run: |
-          az storage account create \
-            --name ${{ env.STORAGE_ACCOUNT_NAME }} \
-            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-            --location ${{ env.LOCATION }} \
-            --sku Standard_LRS \
-            --allow-blob-public-access true
+  #     - name: Create Storage Account
+  #       id: create_storage_account
+  #       run: |
+  #         az storage account create \
+  #           --name ${{ env.STORAGE_ACCOUNT_NAME }} \
+  #           --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+  #           --location ${{ env.LOCATION }} \
+  #           --sku Standard_LRS \
+  #           --allow-blob-public-access true
         
-      - name: Create Container
-        id: create_container
-        run: |
-          az storage container create \
-            --name ${{ env.CONTAINER_NAME }} \
-            --account-name ${{ env.STORAGE_ACCOUNT_NAME }}
+  #     - name: Create Container
+  #       id: create_container
+  #       run: |
+  #         az storage container create \
+  #           --name ${{ env.CONTAINER_NAME }} \
+  #           --account-name ${{ env.STORAGE_ACCOUNT_NAME }}
 
-      - name: Create Compute Gallery
-        id: create_compute_gallery
-        run: |
-          az sig create \
-            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-            --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
-            --location ${{ env.LOCATION }}
+  #     - name: Create Compute Gallery
+  #       id: create_compute_gallery
+  #       run: |
+  #         az sig create \
+  #           --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+  #           --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
+  #           --location ${{ env.LOCATION }}
 
-      - name: Create Image Definition
-        id: create_image_definition
-        run: |
-          az sig image-definition create \
-            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-            --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
-            --gallery-image-definition ${{ env.IMAGE_DEFINITION_NAME }} \
-            --publisher ${{ env.IMAGE_PUBLISHER }} \
-            --offer ${{ env.IMAGE_OFFER }} \
-            --sku ${{ env.IMAGE_SKU }} \
-            --os-type Linux \
-            --os-state specialized
+  #     - name: Create Image Definition
+  #       id: create_image_definition
+  #       run: |
+  #         az sig image-definition create \
+  #           --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+  #           --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
+  #           --gallery-image-definition ${{ env.IMAGE_DEFINITION_NAME }} \
+  #           --publisher ${{ env.IMAGE_PUBLISHER }} \
+  #           --offer ${{ env.IMAGE_OFFER }} \
+  #           --sku ${{ env.IMAGE_SKU }} \
+  #           --os-type Linux \
+  #           --os-state specialized
 
-  build_packer_image:
-    runs-on: ubuntu-20.04
-    needs: [create_infrastrucutre]
+  # build_packer_image:
+  #   runs-on: ubuntu-20.04
+  #   needs: [create_infrastrucutre]
 
-    steps:
-      - name: Checkout Repository
-        id: checkout
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout Repository
+  #       id: checkout
+  #       uses: actions/checkout@v4
 
-      - name: Login to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+  #     - name: Login to Azure
+  #       uses: azure/login@v1
+  #       with:
+  #         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Install KVM virtualization
-        id: install_kvm
-        run: |
-          sudo apt-get update
-          sudo apt-get install qemu qemu-kvm libvirt-daemon-system -y
-          sudo apt-get install libvirt-clients virt-manager bridge-utils -y
-          sudo usermod -aG kvm $USER
-          sudo chmod 666 /dev/kvm
-          sudo addgroup libvirtd
-          sudo usermod -aG libvirtd $USER
-          sudo adduser $USER libvirt
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660"' | sudo tee /etc/udev/rules.d/99-kvm.rules
-          sudo udevadm control --reload-rules
-          sudo systemctl restart libvirtd
-          export DISPLAY=
+  #     - name: Install KVM virtualization
+  #       id: install_kvm
+  #       run: |
+  #         sudo apt-get update
+  #         sudo apt-get install qemu qemu-kvm libvirt-daemon-system -y
+  #         sudo apt-get install libvirt-clients virt-manager bridge-utils -y
+  #         sudo usermod -aG kvm $USER
+  #         sudo chmod 666 /dev/kvm
+  #         sudo addgroup libvirtd
+  #         sudo usermod -aG libvirtd $USER
+  #         sudo adduser $USER libvirt
+  #         echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660"' | sudo tee /etc/udev/rules.d/99-kvm.rules
+  #         sudo udevadm control --reload-rules
+  #         sudo systemctl restart libvirtd
+  #         export DISPLAY=
 
-      - name: Set up Packer
-        id: setup_packer
-        uses: hashicorp/setup-packer@main
-        with:
-          version: ${{ env.PRODUCT_VERSION }}
+  #     - name: Set up Packer
+  #       id: setup_packer
+  #       uses: hashicorp/setup-packer@main
+  #       with:
+  #         version: ${{ env.PRODUCT_VERSION }}
 
-      - name: Run `packer init`
-        id: init_packer
-        run: packer init .
+  #     - name: Run `packer init`
+  #       id: init_packer
+  #       run: packer init .
 
-      - name: Run `packer validate`
-        id: validate_packer
-        run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
-          chmod 600 id_rsa
-          packer validate -var-file="dev.pkrvars.hcl" \
-                          -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
-                          -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
-                          -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
-                          -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
-                          -var 'ssh_private_key_file=id_rsa' .
+  #     - name: Run `packer validate`
+  #       id: validate_packer
+  #       run: |
+  #         echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
+  #         chmod 600 id_rsa
+  #         packer validate -var-file="dev.pkrvars.hcl" \
+  #                         -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
+  #                         -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
+  #                         -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
+  #                         -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
+  #                         -var 'ssh_private_key_file=id_rsa' .
                           
-      - name: Build Image
-        id: build_packer_image
-        run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
-          chmod 600 id_rsa
-          PACKER_LOG=1 packer build -var-file="dev.pkrvars.hcl" \
-                                    -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
-                                    -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
-                                    -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
-                                    -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
-                                    -var 'ssh_private_key_file=id_rsa' \
-                                    -force .
+  #     - name: Build Image
+  #       id: build_packer_image
+  #       run: |
+  #         echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
+  #         chmod 600 id_rsa
+  #         PACKER_LOG=1 packer build -var-file="dev.pkrvars.hcl" \
+  #                                   -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
+  #                                   -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
+  #                                   -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
+  #                                   -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
+  #                                   -var 'ssh_private_key_file=id_rsa' \
+  #                                   -force .
 
-      - name: Cleanup Github Runner
-        id: runner_cleanup
-        run: |
-          df -h
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /opt/ghc
-          sudo rm -rf "/usr/local/share/boost"
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-          sudo apt-get clean
-          sudo apt-get autoclean
-          df -h
+  #     - name: Cleanup Github Runner
+  #       id: runner_cleanup
+  #       run: |
+  #         df -h
+  #         sudo rm -rf /usr/share/dotnet
+  #         sudo rm -rf /opt/ghc
+  #         sudo rm -rf "/usr/local/share/boost"
+  #         sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+  #         sudo apt-get clean
+  #         sudo apt-get autoclean
+  #         df -h
 
-      - name: Convert Image to VHD
-        id: convert_image_to_vhd
-        run: |
-          qemu-img convert \
-            -f qcow2 \
-            -o subformat=fixed,force_size \
-            -S 0 \
-            -O vpc ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.QCOW2_IMAGE_NAME }} ${{ env.VHD_IMAGE_NAME }}
+  #     - name: Convert Image to VHD
+  #       id: convert_image_to_vhd
+  #       run: |
+  #         qemu-img convert \
+  #           -f qcow2 \
+  #           -o subformat=fixed,force_size \
+  #           -S 0 \
+  #           -O vpc ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.QCOW2_IMAGE_NAME }} ${{ env.VHD_IMAGE_NAME }}
 
-      - name: Upload VHD to Storage Account
-        id: upload_vhd_to_storage_account
-        run: |
-          az storage blob upload \
-            --account-name ${{ env.STORAGE_ACCOUNT_NAME }} \
-            --container-name ${{ env.CONTAINER_NAME }} \
-            --name ${{ env.VHD_IMAGE_NAME }} \
-            --file ${{ env.VHD_IMAGE_NAME }} \
-            --type page \
-            --overwrite true
+  #     - name: Upload VHD to Storage Account
+  #       id: upload_vhd_to_storage_account
+  #       run: |
+  #         az storage blob upload \
+  #           --account-name ${{ env.STORAGE_ACCOUNT_NAME }} \
+  #           --container-name ${{ env.CONTAINER_NAME }} \
+  #           --name ${{ env.VHD_IMAGE_NAME }} \
+  #           --file ${{ env.VHD_IMAGE_NAME }} \
+  #           --type page \
+  #           --overwrite true
 
   run_vm_custom_image:
     runs-on: ubuntu-20.04
-    needs: [build_packer_image]
+    # needs: [build_packer_image]
 
     steps: 
-      - name: Checkout Repository
-        id: checkout
-        uses: actions/checkout@v4
+      # - name: Checkout Repository
+      #   id: checkout
+      #   uses: actions/checkout@v4
 
-      - name: Login to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      # - name: Login to Azure
+      #   uses: azure/login@v1
+      #   with:
+      #     creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Create the image version
-        id: create_image_version
-        run: |
-          STORAGE_ACCOUNT_ID=$(az storage account show \
-            --name ${{ env.STORAGE_ACCOUNT_NAME }} \
-            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-            --query id \
-            --output tsv)
-          VHD_URI=$(az storage blob url \
-            --account-name ${{ env.STORAGE_ACCOUNT_NAME }} \
-            --container-name ${{ env.CONTAINER_NAME }} \
-            --name ${{ env.VHD_IMAGE_NAME }} \
-            --output tsv)
-          az sig image-version create \
-            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-            --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
-            --gallery-image-definition ${{ env.IMAGE_DEFINITION_NAME }} \
-            --gallery-image-version ${{ env.IMAGE_VERSION }} \
-            --target-regions ${{ env.LOCATION }} \
-            --replica-count 1 \
-            --os-vhd-storage-account ${STORAGE_ACCOUNT_ID} \
-            --os-vhd-uri ${VHD_URI}
-
-      - name: Create VM
-        id: create_vm
-        run: |
-          IMAGE_ID=$(az sig image-definition list \
-            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-            --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
-            --query "[].[id]" \
-            --output tsv)
-          echo "${{ env.SSH_PUBLIC_KEY }}" > id_rsa.pub
-          az vm create \
-            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-            --location ${{ env.LOCATION }} \
-            --name ${{ env.VM_NAME }} \
-            --image ${IMAGE_ID} \
-            --admin-username ${{ env.VM_USER_NAME }} \
-            --ssh-key-values id_rsa.pub \
-            --specialized
-
-      # - name: Create VM disk
-      #   id: create_vm_disk
+      # - name: Create the image version
+      #   id: create_image_version
       #   run: |
+      #     STORAGE_ACCOUNT_ID=$(az storage account show \
+      #       --name ${{ env.STORAGE_ACCOUNT_NAME }} \
+      #       --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+      #       --query id \
+      #       --output tsv)
       #     VHD_URI=$(az storage blob url \
       #       --account-name ${{ env.STORAGE_ACCOUNT_NAME }} \
       #       --container-name ${{ env.CONTAINER_NAME }} \
       #       --name ${{ env.VHD_IMAGE_NAME }} \
       #       --output tsv)
-      #     echo ${VHD_URI}
-      #     az disk create \
+      #     az sig image-version create \
       #       --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-      #       --name ${{ env.VHD_IMAGE_NAME }}}} \
-      #       --source ${VHD_URI}
+      #       --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
+      #       --gallery-image-definition ${{ env.IMAGE_DEFINITION_NAME }} \
+      #       --gallery-image-version ${{ env.IMAGE_VERSION }} \
+      #       --target-regions ${{ env.LOCATION }} \
+      #       --replica-count 1 \
+      #       --os-vhd-storage-account ${STORAGE_ACCOUNT_ID} \
+      #       --os-vhd-uri ${VHD_URI}
 
       # - name: Create VM
       #   id: create_vm
       #   run: |
+      #     IMAGE_ID=$(az sig image-definition list \
+      #       --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+      #       --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
+      #       --query "[].[id]" \
+      #       --output tsv)
+      #     echo "${{ env.SSH_PUBLIC_KEY }}" > id_rsa.pub
       #     az vm create \
       #       --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
       #       --location ${{ env.LOCATION }} \
       #       --name ${{ env.VM_NAME }} \
-      #       --size Standard_DS2_v2 \
-      #       --attach-os-disk ${{ env.VHD_IMAGE_NAME }} \
-      #       --os-type linux
+      #       --image ${IMAGE_ID} \
+      #       --specialized
 
       - name: Run CIS Rocky Linux tests
         id: cis_tests
@@ -281,6 +254,7 @@ jobs:
             --show-details \
             --query publicIps \
             --output tsv)
+          mkdir -p ~/.ssh
           ssh-keyscan -H -t rsa ${PUBLIC_IP}  >> ~/.ssh/known_hosts
           ssh -i id_rsa ${{ vars.VM_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
 
