@@ -15,7 +15,7 @@ env:
   RESOURCE_GROUP_NAME: ${{ vars.RESOURCE_GROUP_NAME }}
 
 jobs:
-  create_infrastrucutre:
+  delete_infrastrucutre:
     runs-on: ubuntu-20.04
 
     steps:

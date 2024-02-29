@@ -125,16 +125,16 @@ jobs:
       - name: Create the image version
         id: create_image_version
         run: |
-          echo "STORAGE_ACCOUNT_ID=$(az storage account show \
+          STORAGE_ACCOUNT_ID=$(az storage account show \
             --name ${{ env.STORAGE_ACCOUNT_NAME }} \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
             --query id \
-            --output tsv)" >> $GITHUB_ENV
-          echo "VHD_URI=$(az storage blob url \
+            --output tsv)
+          VHD_URI=$(az storage blob url \
             --account-name ${{ env.STORAGE_ACCOUNT_NAME }} \
             --container-name ${{ env.CONTAINER_NAME }} \
             --name ${{ env.VHD_DISK_NAME }} \
-            --output tsv)" >> $GITHUB_ENV
+            --output tsv)
           az sig image-version create \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
             --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
@@ -142,8 +142,8 @@ jobs:
             --gallery-image-version ${{ env.IMAGE_VERSION }} \
             --target-regions ${{ env.LOCATION }} \
             --replica-count 1 \
-            --os-vhd-storage-account ${{ env.STORAGE_ACCOUNT_ID }} \
-            --os-vhd-uri ${{ env.VHD_URI }}
+            --os-vhd-storage-account ${STORAGE_ACCOUNT_ID} \
+            --os-vhd-uri ${VHD_URI}
 
   build_packer_image:
     runs-on: ubuntu-20.04
