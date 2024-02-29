@@ -195,15 +195,15 @@ jobs:
     runs-on: ubuntu-20.04
   #   needs: [build_packer_image]
 
-  #   steps: 
+    steps: 
   #     - name: Checkout Repository
   #       id: checkout
   #       uses: actions/checkout@v4
 
-  #     - name: Login to Azure
-  #       uses: azure/login@v1
-  #       with:
-  #         creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
   #     - name: Create the image version
   #       id: create_image_version
