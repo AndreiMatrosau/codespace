@@ -254,8 +254,6 @@ jobs:
             --show-details \
             --query publicIps \
             --output tsv)
-          mkdir -p ~/.ssh
-          ssh-keyscan -H -t rsa ${PUBLIC_IP}  >> ~/.ssh/known_hosts
           ssh -i id_rsa ${{ vars.VM_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
 
       - name: Shutdown and dismantle VM
