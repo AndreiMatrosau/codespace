@@ -133,7 +133,7 @@ jobs:
           VHD_URI=$(az storage blob url \
             --account-name ${{ env.STORAGE_ACCOUNT_NAME }} \
             --container-name ${{ env.CONTAINER_NAME }} \
-            --name ${{ env.VHD_DISK_NAME }} \
+            --name ${{ env.VHD_IMAGE_NAME }} \
             --output tsv)
           az sig image-version create \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
