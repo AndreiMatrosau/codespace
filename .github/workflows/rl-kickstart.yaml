@@ -39,19 +39,15 @@ jobs:
 
     steps:
 
-      # - name: Cleanup Github Runner
-      #   id: runner_cleanup
-      #   run: |
-      #     df -h
-      #     echo "++++++++++++++++++++++"
-      #     sudo rm -rf /usr/share/dotnet
-      #     sudo rm -rf /opt/ghc
-      #     sudo rm -rf "/usr/local/share/boost"
-      #     sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-      #     sudo apt-get clean
-      #     sudo apt-get autoclean
-      #     echo "++++++++++++++++++++++"
-      #     df -h
+      - name: Cleanup Github Runner
+        id: runner_cleanup
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          sudo apt-get clean
+          sudo apt-get autoclean
 
       - name: Checkout Repository
         id: checkout
@@ -62,65 +58,66 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # - name: Install KVM virtualization
-      #   id: install_kvm
-      #   run: |
-      #     sudo apt-get update
-      #     sudo apt-get install qemu qemu-kvm libvirt-daemon-system -y
-      #     sudo apt-get install libvirt-clients virt-manager bridge-utils -y
-      #     sudo usermod -aG kvm $USER
-      #     sudo addgroup libvirtd
-      #     sudo usermod -aG libvirtd $USER
-      #     sudo adduser $USER libvirt
-      #     echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660"' | sudo tee /etc/udev/rules.d/99-kvm.rules
-      #     sudo udevadm control --reload-rules
-      #     sudo systemctl restart libvirtd
-      #     export DISPLAY=
+      - name: Install KVM virtualization
+        id: install_kvm
+        run: |
+          sudo apt-get update
+          sudo apt-get install qemu qemu-kvm libvirt-daemon-system -y
+          sudo apt-get install libvirt-clients virt-manager bridge-utils -y
+          sudo usermod -aG kvm $USER
+          sudo addgroup libvirtd
+          sudo usermod -aG libvirtd $USER
+          sudo adduser $USER libvirt
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660"' | sudo tee /etc/udev/rules.d/99-kvm.rules
+          sudo udevadm control --reload-rules
+          sudo systemctl restart libvirtd
+          export DISPLAY=
 
-      # - name: Create Resource Group
-      #   id: create_resource_group
-      #   run: |
-      #     az group create \
-      #       --name ${{ env.RESOURCE_GROUP_NAME }} \
-      #       --location ${{ env.LOCATION }}
+      - name: Create Resource Group
+        id: create_resource_group
+        run: |
+          az group create \
+            --name ${{ env.RESOURCE_GROUP_NAME }} \
+            --location ${{ env.LOCATION }}
 
-      # - name: Create Storage Account
-      #   id: create_storage_account
-      #   run: |
-      #     az storage account create \
-      #       --name ${{ env.STORAGE_ACCOUNT_NAME }} \
-      #       --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-      #       --location ${{ env.LOCATION }} \
-      #       --sku Standard_LRS \
-      #       --allow-blob-public-access true
+      - name: Create Storage Account
+        id: create_storage_account
+        run: |
+          az storage account create \
+            --name ${{ env.STORAGE_ACCOUNT_NAME }} \
+            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+            --location ${{ env.LOCATION }} \
+            --sku Standard_LRS \
+            --allow-blob-public-access true
         
-      # - name: Create Container
-      #   id: create_container
-      #   run: |
-      #     az storage container create \
-      #       --name ${{ env.CONTAINER_NAME }} \
-      #       --account-name ${{ env.STORAGE_ACCOUNT_NAME }}
+      - name: Create Container
+        id: create_container
+        run: |
+          az storage container create \
+            --name ${{ env.CONTAINER_NAME }} \
+            --account-name ${{ env.STORAGE_ACCOUNT_NAME }} \
+            --public-access blob
 
-      # - name: Create Compute Gallery
-      #   id: create_compute_gallery
-      #   run: |
-      #     az sig create \
-      #       --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-      #       --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
-      #       --location ${{ env.LOCATION }}
+      - name: Create Compute Gallery
+        id: create_compute_gallery
+        run: |
+          az sig create \
+            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+            --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
+            --location ${{ env.LOCATION }}
 
-      # - name: Create Image Definition
-      #   id: create_image_definition
-      #   run: |
-      #     az sig image-definition create \
-      #       --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-      #       --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
-      #       --gallery-image-definition ${{ env.IMAGE_DEFINITION_NAME }} \
-      #       --publisher ${{ env.IMAGE_PUBLISHER }} \
-      #       --offer ${{ env.IMAGE_OFFER }} \
-      #       --sku ${{ env.IMAGE_SKU }} \
-      #       --os-type Linux \
-      #       --os-state specialized
+      - name: Create Image Definition
+        id: create_image_definition
+        run: |
+          az sig image-definition create \
+            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+            --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
+            --gallery-image-definition ${{ env.IMAGE_DEFINITION_NAME }} \
+            --publisher ${{ env.IMAGE_PUBLISHER }} \
+            --offer ${{ env.IMAGE_OFFER }} \
+            --sku ${{ env.IMAGE_SKU }} \
+            --os-type Linux \
+            --os-state specialized
 
       - name: Create the image version
         id: create_image_version
