@@ -247,7 +247,7 @@ jobs:
         id: cis_tests
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
-          chmod 600 id_rsa
+          chmod 400 id_rsa
           PUBLIC_IP=$(az vm show \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
             --name ${{ env.VM_NAME }} \
