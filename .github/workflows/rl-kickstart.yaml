@@ -19,19 +19,19 @@ env:
   RESOURCE_GROUP_NAME: ${{ vars.RESOURCE_GROUP_NAME }}
   LOCATION: ${{ vars.LOCATION }}
   VM_NAME: ${{ vars.VM_NAME }}
+  VM_USER_NAME: ${{ vars.VM_USER_NAME }}
   STORAGE_ACCOUNT_NAME: ${{ vars.STORAGE_ACCOUNT_NAME }}
   CONTAINER_NAME: ${{ vars.CONTAINER_NAME }}
   IMAGE_PUBLISHER: ${{ vars.IMAGE_PUBLISHER }}
   IMAGE_OFFER: ${{ vars.IMAGE_OFFER }}
   IMAGE_SKU: ${{ vars.IMAGE_SKU }}
   COMPUTE_GALLERY_NAME: ${{ vars.COMPUTE_GALLERY_NAME }}
-  IMAGE_DEFINITION_NAME: ${{ vars.IMAGE_DEFINITION_NAME }}
   COMPUTE_GALLERY_RESOURCE_GROUP_NAME: ${{ vars.COMPUTE_GALLERY_RESOURCE_GROUP_NAME }}
+  IMAGE_DEFINITION_NAME: ${{ vars.IMAGE_DEFINITION_NAME }}
+  IMAGE_VERSION: ${{ vars.IMAGE_VERSION }}
   QEMU_IMAGE_OUTPUT_DIR: ${{ vars.QEMU_IMAGE_OUTPUT_DIR }}
   QCOW2_IMAGE_NAME: ${{ vars.QCOW2_IMAGE_NAME }}
   VHD_IMAGE_NAME: ${{ vars.VHD_IMAGE_NAME }}
-  IMAGE_VERSION: ${{ vars.IMAGE_VERSION }}
-  VM_USER_NAME: ${{ vars.VM_USER_NAME }}
 
 jobs:
   create_infrastrucutre:
@@ -39,15 +39,15 @@ jobs:
 
     steps:
 
-      - name: Cleanup Github Runner
-        id: runner_cleanup
-        run: |
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /opt/ghc
-          sudo rm -rf "/usr/local/share/boost"
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-          sudo apt-get clean
-          sudo apt-get autoclean
+      # - name: Cleanup Github Runner
+      #   id: runner_cleanup
+      #   run: |
+      #     sudo rm -rf /usr/share/dotnet
+      #     sudo rm -rf /opt/ghc
+      #     sudo rm -rf "/usr/local/share/boost"
+      #     sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+      #     sudo apt-get clean
+      #     sudo apt-get autoclean
 
       - name: Checkout Repository
         id: checkout
@@ -58,20 +58,20 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Install KVM virtualization
-        id: install_kvm
-        run: |
-          sudo apt-get update
-          sudo apt-get install qemu qemu-kvm libvirt-daemon-system -y
-          sudo apt-get install libvirt-clients virt-manager bridge-utils -y
-          sudo usermod -aG kvm $USER
-          sudo addgroup libvirtd
-          sudo usermod -aG libvirtd $USER
-          sudo adduser $USER libvirt
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660"' | sudo tee /etc/udev/rules.d/99-kvm.rules
-          sudo udevadm control --reload-rules
-          sudo systemctl restart libvirtd
-          export DISPLAY=
+      # - name: Install KVM virtualization
+      #   id: install_kvm
+      #   run: |
+      #     sudo apt-get update
+      #     sudo apt-get install qemu qemu-kvm libvirt-daemon-system -y
+      #     sudo apt-get install libvirt-clients virt-manager bridge-utils -y
+      #     sudo usermod -aG kvm $USER
+      #     sudo addgroup libvirtd
+      #     sudo usermod -aG libvirtd $USER
+      #     sudo adduser $USER libvirt
+      #     echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660"' | sudo tee /etc/udev/rules.d/99-kvm.rules
+      #     sudo udevadm control --reload-rules
+      #     sudo systemctl restart libvirtd
+      #     export DISPLAY=
 
       - name: Create Resource Group
         id: create_resource_group
@@ -96,7 +96,7 @@ jobs:
           az storage container create \
             --name ${{ env.CONTAINER_NAME }} \
             --account-name ${{ env.STORAGE_ACCOUNT_NAME }} \
-            --public-access blob
+            --public-access container
 
       - name: Create Compute Gallery
         id: create_compute_gallery
@@ -199,8 +199,6 @@ jobs:
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
           chmod 600 id_rsa
-          echo "SSH key file contents:"
-          cat id_rsa
           PACKER_LOG=1 packer build -var-file="dev.pkrvars.hcl" \
                                     -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
                                     -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
@@ -267,9 +265,6 @@ jobs:
             --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
             --query "[].[id]" \
             --output tsv)
-          echo "**********"
-          echo ${IMAGE_ID}
-          echo "**********"
           az vm create \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
             --location ${{ env.LOCATION }} \
