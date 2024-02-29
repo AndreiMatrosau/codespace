@@ -30,6 +30,7 @@ env:
   QEMU_IMAGE_OUTPUT_DIR: ${{ vars.QEMU_IMAGE_OUTPUT_DIR }}
   QCOW2_IMAGE_NAME: ${{ vars.QCOW2_IMAGE_NAME }}
   VHD_IMAGE_NAME: ${{ vars.VHD_IMAGE_NAME }}
+  IMAGE_VERSION: ${{ vars.IMAGE_VERSION }}
   VM_USER_NAME: ${{ vars.VM_USER_NAME }}
 
 jobs:
@@ -121,6 +122,19 @@ jobs:
             --os-type Linux \
             --os-state specialized
 
+      - name: Create the image version
+        id: create_image_version
+        run: |
+          az sig image-version create \
+            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+            --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
+            --gallery-image-definition ${{ env.IMAGE_DEFINITION_NAME }} \
+            --gallery-image-version ${{ env.IMAGE_VERSION }} \
+            --target-regions ${{ env.LOCATION }} \
+            --replica-count 1 \
+            --managed-image ${{ env.STORAGE_ACCOUNT_NAME }} \
+            --managed-image-rg ${{ env.RESOURCE_GROUP_NAME }}
+
   build_packer_image:
     runs-on: ubuntu-20.04
     needs: [create_infrastrucutre]
@@ -192,12 +206,14 @@ jobs:
         id: runner_cleanup
         run: |
           df -h
+          echo "++++++++++++++++++++++"
           sudo rm -rf /usr/share/dotnet
           sudo rm -rf /opt/ghc
           sudo rm -rf "/usr/local/share/boost"
           sudo rm -rf "$AGENT_TOOLSDIRECTORY"
           sudo apt-get clean
           sudo apt-get autoclean
+          echo "++++++++++++++++++++++"
           df -h
 
       - name: Convert Image to VHD
@@ -245,7 +261,9 @@ jobs:
             --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
             --query "[].[id]" \
             --output tsv)
+          echo "**********"
           echo ${IMAGE_ID}
+          echo "**********"
           az vm create \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
             --location ${{ env.LOCATION }} \
