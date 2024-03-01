@@ -248,17 +248,21 @@ jobs:
       - name: Run CIS Rocky Linux tests
         id: cis_tests
         run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
-          chmod 400 id_rsa
+
+          # echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
+          # chmod 400 id_rsa
           PUBLIC_IP=$(az vm show \
             --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
             --name ${{ env.VM_NAME }} \
             --show-details \
             --query publicIps \
             --output tsv)
-          # ssh -i id_rsa ${{ vars.VM_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
-          ssh-keyscan -H -t rsa ${PUBLIC_IP}  >> ~/.ssh/known_hosts
-          ssh -i ~/.ssh/id_rsa ${{ vars.VM_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
+          echo "{PUBLIC_IP}"
+          echo "${{ vars.VM_USER_NAME }}"
+          ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} rocky@{PUBLIC_IP}
+          # # ssh -i id_rsa ${{ vars.VM_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
+          # ssh-keyscan -H -t rsa ${PUBLIC_IP}  >> ~/.ssh/known_hosts
+          # ssh -i ~/.ssh/id_rsa ${{ vars.VM_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
 
       # - name: Run CIS Rocky Linux tests
       #   id: cis_tests
