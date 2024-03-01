@@ -255,11 +255,13 @@ jobs:
             --query publicIps \
             --output tsv)
           echo "-----------------------"
-          echo "{PUBLIC_IP}"
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > rocky_rsa
           echo "-----------------------"
-          echo "${{ vars.VM_USER_NAME }}"
+          echo "${PUBLIC_IP}"
           echo "-----------------------"
-          ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} rocky@{PUBLIC_IP}
+          cat rocky_rsa
+          echo "-----------------------"
+          ssh -o StrictHostKeyChecking=no -i rocky_rsa ${{ vars.VM_USER_NAME }}@${PUBLIC_IP}
 
       - name: Shutdown and dismantle VM
         id: shutdown_dismantle_vm
