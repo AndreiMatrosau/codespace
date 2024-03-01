@@ -231,21 +231,20 @@ jobs:
       - name: Create VM
         id: create_vm
         run: |
-          az vm create -g rg-packer-vm-ga -n manual-run-1.0.0 --image /subscriptions/c6a76d9c-0f67-4a42-b2a1-3defb05f2aae/resourceGroups/rg-packer-vm-test/providers/Microsoft.Compute/galleries/rl9efigallery/images/rl9img/versions/1.0.0 --specialized --generate-ssh-keys
-          # IMAGE_ID=$(az sig image-definition list \
-          #   --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-          #   --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
-          #   --query "[].[id]" \
-          #   --output tsv)
-          # echo "${{ env.SSH_PUBLIC_KEY }}" > id_rsa.pub
-          # chmod 600 id_rsa.pub
-          # az vm create \
-          #   --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-          #   --location ${{ env.LOCATION }} \
-          #   --name ${{ env.VM_NAME }} \
-          #   --image ${IMAGE_ID} \
-          #   --ssh-key-name id_rsa.pub \ 
-          #   --specialized
+          # az vm create -g rg-packer-vm-ga -n manual-run-1.0.0 --image /subscriptions/c6a76d9c-0f67-4a42-b2a1-3defb05f2aae/resourceGroups/rg-packer-vm-test/providers/Microsoft.Compute/galleries/rl9efigallery/images/rl9img/versions/1.0.0 --specialized --generate-ssh-keys
+          IMAGE_ID=$(az sig image-definition list \
+            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+            --gallery-name ${{ env.COMPUTE_GALLERY_NAME }} \
+            --query "[].[id]" \
+            --output tsv)
+          az vm create \
+            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+            --location ${{ env.LOCATION }} \
+            --name ${{ env.VM_NAME }} \
+            --image ${IMAGE_ID} \
+            --ssh-key-name id_rsa.pub \
+            --generate-ssh-keys \
+            --specialized
 
       - name: Run CIS Rocky Linux tests
         id: cis_tests
