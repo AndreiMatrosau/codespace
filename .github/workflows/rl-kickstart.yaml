@@ -256,7 +256,21 @@ jobs:
             --show-details \
             --query publicIps \
             --output tsv)
-          ssh -i id_rsa ${{ vars.VM_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
+          # ssh -i id_rsa ${{ vars.VM_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
+          ssh-keyscan -H -t rsa ${PUBLIC_IP}  >> ~/.ssh/known_hosts
+          ssh -i ~/.ssh/id_rsa ${{ vars.VM_ADMIN_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
+
+      # - name: Run CIS Rocky Linux tests
+      #   id: cis_tests
+      #   run: |
+      #     PUBLIC_IP=$(az vm show \
+      #       --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+      #       --name ${{ env.VM_NAME }} \
+      #       --show-details \
+      #       --query publicIps \
+      #       --output tsv)
+      #     ssh-keyscan -H -t rsa ${PUBLIC_IP}  >> ~/.ssh/known_hosts
+      #     ssh -i ~/.ssh/id_rsa ${{ vars.VM_ADMIN_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
 
       - name: Shutdown and dismantle VM
         id: shutdown_dismantle_vm
