@@ -196,9 +196,9 @@ jobs:
   #   needs: [build_packer_image]
 
     steps: 
-  #     - name: Checkout Repository
-  #       id: checkout
-  #       uses: actions/checkout@v4
+      - name: Checkout Repository
+        id: checkout
+        uses: actions/checkout@v4
 
       - name: Login to Azure
         uses: azure/login@v1
@@ -242,7 +242,6 @@ jobs:
             --location ${{ env.LOCATION }} \
             --name ${{ env.VM_NAME }} \
             --image ${IMAGE_ID} \
-            --ssh-key-name id_rsa.pub \
             --generate-ssh-keys \
             --specialized
 
