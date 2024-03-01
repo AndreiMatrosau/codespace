@@ -258,7 +258,7 @@ jobs:
           chmod 400 rocky_rsa
           ssh -o StrictHostKeyChecking=no \
               -i rocky_rsa \
-              ${{ vars.VM_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
+              ${{ vars.VM_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh > output.txt
 
       - name: Upload output as artifact
         id: cis_test_output
