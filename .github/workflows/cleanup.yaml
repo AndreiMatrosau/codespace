@@ -3,13 +3,12 @@ name: Delete Resource group
 on:
   workflow_dispatch:
     inputs:
-      stage:
-        description: "Deployment Stage"
+      approve_deletion:
+        description: "Delete the resource group"
         required: true
         type: choice
         options:
-          - "dev"
-          - "prod"
+          - "approve"
 
 env:
   RESOURCE_GROUP_NAME: ${{ vars.RESOURCE_GROUP_NAME }}
