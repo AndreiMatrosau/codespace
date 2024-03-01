@@ -256,7 +256,7 @@ jobs:
             --output tsv)
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > rocky_rsa
           chmod 400 rocky_rsa
-          ssh -o StrictHostKeyChecking=no -i rocky_rsa ${{ vars.VM_USER_NAME }}@${PUBLIC_IP}
+          ssh -o StrictHostKeyChecking=no -i rocky_rsa -tt ${{ vars.VM_USER_NAME }}@${PUBLIC_IP}
 
       - name: Shutdown and dismantle VM
         id: shutdown_dismantle_vm
