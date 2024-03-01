@@ -254,13 +254,8 @@ jobs:
             --show-details \
             --query publicIps \
             --output tsv)
-          echo "-----------------------"
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > rocky_rsa
-          echo "-----------------------"
-          echo "${PUBLIC_IP}"
-          echo "-----------------------"
-          cat rocky_rsa
-          echo "-----------------------"
+          chmod 400 rocky_rsa
           ssh -o StrictHostKeyChecking=no -i rocky_rsa ${{ vars.VM_USER_NAME }}@${PUBLIC_IP}
 
       - name: Shutdown and dismantle VM
