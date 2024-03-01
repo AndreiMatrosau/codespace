@@ -254,7 +254,8 @@ jobs:
             --output tsv)
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > rocky_rsa
           chmod 400 rocky_rsa
-          ssh -o StrictHostKeyChecking=no \
+          sleep 10
+          ssh -V -o StrictHostKeyChecking=no \
               -i rocky_rsa \
               ${{ vars.VM_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh > output.json
 
