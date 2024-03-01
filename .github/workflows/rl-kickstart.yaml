@@ -256,7 +256,14 @@ jobs:
             --output tsv)
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > rocky_rsa
           chmod 400 rocky_rsa
-          ssh -o StrictHostKeyChecking=no -i rocky_rsa -tt ${{ vars.VM_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh
+          ssh -o StrictHostKeyChecking=no -i rocky_rsa -tt ${{ vars.VM_USER_NAME }}@${PUBLIC_IP} 'bash -s' < cis-script.sh; exit
+
+      - name: Upload output as artifact
+        id: cis_test_output
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-output
+          path: output.txt
 
       - name: Shutdown and dismantle VM
         id: shutdown_dismantle_vm
