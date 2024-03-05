@@ -48,19 +48,19 @@ jobs:
       - name: Run `packer validate`
         id: validate_packer
         run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
-          chmod 400 id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > rocky_rsa
+          chmod 400 rocky_rsa
           packer validate -var-file="dev.pkrvars.hcl" \
-                          -var 'ssh_private_key_file=id_rsa' \
+                          -var 'ssh_private_key_file=rocky_rsa' \
                           .
                           
       - name: Build Image
         id: build_packer_image
         run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
-          chmod 400 id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > rocky_rsa
+          chmod 600 rocky_rsa
           PACKER_LOG=1 packer build -var-file="dev.pkrvars.hcl" \
-                                    -var 'ssh_private_key_file=id_rsa' \
+                                    -var 'ssh_private_key_file=rocky_rsa' \
                                     -force .
 
       - name: Run Qemu VM
