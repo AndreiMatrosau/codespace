@@ -32,7 +32,7 @@ jobs:
       - name: Install KVM virtualization
         id: install_kvm
         run: |
-          chmod 700 install_kvm.sh
+          chmod +x install_kvm.sh
           sudo -E ./install_kvm.sh
 
       - name: Set up Packer
@@ -66,7 +66,7 @@ jobs:
       - name: Run Qemu VM
         id: run_vm
         run: |
-          chmod 700 run-vm.sh
+          chmod +x run-vm.sh
           sudo -E ./run-vm.sh
 
       - name: Run CIS test
