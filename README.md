@@ -169,3 +169,4 @@ az sig image-version create --resource-group rg-packer-vm-test --gallery-name rl
 
 az vm create --resource-group ${{ env.RESOURCE_GROUP_NAME }} --location ${{ env.LOCATION }} --name ${{ env.VM_NAME }} --image ${IMAGE_ID} --specialized
 **********************************************************************************************************************************************************************
+/usr/bin/qemu-system-x86_64: []string{"-vnc", "127.0.0.1:67", "-cpu", "host", "-drive", "file=output_rl9/rocky9.3,if=virtio,cache=writeback,discard=ignore,format=qcow2", "-drive", "file=iso/Rocky-9.3-x86_64.iso,media=cdrom", "-drive", "file=/usr/share/OVMF/OVMF_CODE.fd,if=pflash,unit=0,format=raw,readonly=on", "-drive", "file=output_rl9/efivars.fd,if=pflash,unit=1,format=raw", "-netdev", "user,id=user.0,hostfwd=tcp::2701-:22,", "-device", "virtio-net-pci,netdev=user.0", "-machine", "type=pc,accel=kvm", "-name", "rocky9.3", "-m", "4096M", "-smp", "1"}
