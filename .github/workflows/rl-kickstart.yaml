@@ -140,7 +140,8 @@ jobs:
       - name: Run Qemu VM
         id: run_vm
         run: |
-          sudo -E run-vm.sh
+          chmod +x run-vm.sh
+          sudo -E ./run-vm.sh
           # sudo qemu-system-x86_64 \
           #   -bios /usr/share/ovmf/OVMF.fd \
           #   -boot c \
