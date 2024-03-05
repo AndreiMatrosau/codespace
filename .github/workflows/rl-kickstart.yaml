@@ -152,7 +152,7 @@ jobs:
             -netdev user,id=usernet0,hostfwd=tcp::3777-:22 \
             -device virtio-net-pci,netdev=usernet0 \
             -display none \
-            -vga none
+            -vga none &
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > rocky_rsa
           chmod 400 rocky_rsa
           ssh -V -o StrictHostKeyChecking=no \
