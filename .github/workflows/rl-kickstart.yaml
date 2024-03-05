@@ -140,7 +140,6 @@ jobs:
       - name: Run Qemu VM
         id: run_vm
         run: |
-          ls -l
           qemu-system-x86_64 \
             -bios /usr/share/ovmf/OVMF.fd \
             -boot c \
@@ -164,6 +163,7 @@ jobs:
               -i rocky_rsa \
               -p 3777 \
               ${{ vars.VM_USER_NAME }}@localhost 'bash -s' < cis-script.sh > output.json
+          cat output.json
 
       - name: Upload output as artifact
         id: cis_test_output
@@ -175,7 +175,9 @@ jobs:
       - name: Stop and Shutdown a VM
         id: stop_shutdown_vm
         run: |
-          qm shutdown --forceStop true
+          id=$(virsh list | awk 'NR>2 {print $1}')
+          echo "$id"
+          virsh shutdown $id
 
       # - name: Upload VHD to Storage Account
       #   id: upload_vhd_to_storage_account
