@@ -141,7 +141,7 @@ jobs:
         id: run_vm
         run: |
           chmod +x run-vm.sh
-          sudo -E ./run-vm.sh
+          sudo -E ./run-vm.sh &
           echo $(virsh list)
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > rocky_rsa
           chmod 400 rocky_rsa
