@@ -185,7 +185,7 @@ jobs:
           qemu-system-x86_64 \
             -bios /usr/share/ovmf/OVMF.fd \
             -boot c \
-            -drive format=raw,id=drive1,if=none,file=output/rocky9.3 \
+            -drive format=raw,id=drive1,if=none,file=output_rl9/rocky9.3 \
             -cpu host \
             -m 4G \
             -smp 2 \
