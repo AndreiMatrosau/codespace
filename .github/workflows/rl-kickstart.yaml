@@ -142,6 +142,14 @@ jobs:
         run: |
           chmod +x run-vm.sh
           sudo -E ./run-vm.sh
+          echo $(virsh list)
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > rocky_rsa
+          chmod 400 rocky_rsa
+          ssh -V -o StrictHostKeyChecking=no \
+              -i rocky_rsa \
+              -p 3777 \
+              ${{ vars.VM_USER_NAME }}@localhost 'bash -s' < cis-script.sh > output.json
+          cat output.json
           # sudo qemu-system-x86_64 \
           #   -bios /usr/share/ovmf/OVMF.fd \
           #   -boot c \
@@ -188,8 +196,9 @@ jobs:
       - name: Stop and Shutdown a VM
         id: stop_shutdown_vm
         run: |
-          id=$(virsh list | awk 'NR>2 {print $1}')
-          echo "$id"
+          echo $(virsh list)
+          id=$(virsh list | awk 'NR>2 {print $2}')
+          echo $id
           virsh shutdown $id
 
       # - name: Upload VHD to Storage Account
