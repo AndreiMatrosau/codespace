@@ -137,6 +137,16 @@ jobs:
                                     -var 'ssh_private_key_file=id_rsa' \
                                     -force .
 
+      - name: Add file to LFS
+        run: |
+          ls -l
+          cd output_rl9
+          ls -l
+          git lfs track "rocky9.3"
+          git add rocky9.3
+          git commit -m "Track qemu2 image"
+          git push
+
       # - name: Upload VHD to Storage Account
       #   id: upload_vhd_to_storage_account
       #   run: |
@@ -157,6 +167,12 @@ jobs:
       - name: Checkout Repository
         id: checkout
         uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Checkout LFS objects
+        run: |
+          git lfs checkout
 
       # - name: Login to Azure
       #   uses: azure/login@v1
@@ -182,6 +198,7 @@ jobs:
       - name: Run Qemu VM
         id: run_vm
         run: |
+          ls -l
           qemu-system-x86_64 \
             -bios /usr/share/ovmf/OVMF.fd \
             -boot c \
