@@ -1,27 +1,3 @@
-variable "client_id" {
-  type        = string
-  description = "The application ID of the AAD Service Principal."
-  sensitive   = true
-}
-
-variable "client_secret" {
-  type        = string
-  description = "A password/secret registered for the AAD SP."
-  sensitive   = true
-}
-
-variable "tenant_id" {
-  type        = string
-  description = "The Active Directory tenant identifier with which client_id and subscription_id are associated."
-  sensitive   = true
-}
-
-variable "subscription_id" {
-  type        = string
-  description = "The subscription to use."
-  sensitive   = true
-}
-
 variable "qemuargs" {
   type = list(list(string))
   description = <<EOT
