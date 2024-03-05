@@ -34,8 +34,8 @@ env:
   VHD_IMAGE_NAME: ${{ vars.VHD_IMAGE_NAME }}
 
 jobs:
-  create_infrastrucutre:
-    runs-on: ubuntu-20.04
+  # create_infrastrucutre:
+  #   runs-on: ubuntu-20.04
 
       # steps:
       #   - name: Checkout Repository
