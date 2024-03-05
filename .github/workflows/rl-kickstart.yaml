@@ -76,15 +76,26 @@ jobs:
       - name: Run Qemu VM
         id: run_vm
         run: |
-          chmod +x run-vm.sh
-          sudo -E ./run-vm.sh
+          sudo -E run-vm.sh
+          # sudo qemu-system-x86_64 \
+          #   -bios /usr/share/ovmf/OVMF.fd \
+          #   -boot c \
+          #   -drive format=raw,id=drive1,if=none,file=output_rl9/rocky9.3 \
+          #   -cpu host \
+          #   -m 4G \
+          #   -smp 2 \
+          #   -enable-kvm \
+          #   -hda output_rl9/rocky9.3 \
+          #   -netdev user,id=usernet0,hostfwd=tcp::3777-:22 \
+          #   -device virtio-net-pci,netdev=usernet0 \
+          #   -display none \
+          #   -vga none &
 
       - name: Run CIS test
         id: cis_test
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > rocky_rsa
           chmod 400 rocky_rsa
-          echo "test ssh connection"
           ssh -V -o StrictHostKeyChecking=no \
               -i rocky_rsa \
               -p 3777 \
