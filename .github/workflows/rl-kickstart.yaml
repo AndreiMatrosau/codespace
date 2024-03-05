@@ -152,8 +152,8 @@ jobs:
             -hda output_rl9/rocky9.3 \
             -netdev user,id=usernet0,hostfwd=tcp::3777-:22 \
             -device virtio-net-pci,netdev=usernet0 \
-            -display gtk \
-            -vga std
+            -display none \
+            -vga none
 
       - name: Run CIS Rocky Linux tests
         id: cis_tests
