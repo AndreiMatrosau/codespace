@@ -143,6 +143,7 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > rocky_rsa
           chmod 400 rocky_rsa
           chmod +x run-vm.sh
+          touch output.json
           ./run-vm.sh rocky_rsa cis-script.sh output.json
           echo "cat output.json
           cat output.json
