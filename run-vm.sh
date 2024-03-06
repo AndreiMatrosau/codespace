@@ -6,7 +6,7 @@ sudo qemu-system-x86_64 -bios /usr/share/ovmf/OVMF.fd -boot c -drive format=raw,
 touch output.json
 
 # Try SSH connection until successful or until 1 minute has passed
-echo "Try to connect vis ssh ..."
+echo "Try to connect via ssh ..."
 counter=0
 until ssh -o StrictHostKeyChecking=no -i $1 -p 3777 rocky@localhost 'bash -s' < $2 > output.json
 do
@@ -21,7 +21,7 @@ done
 echo "done"
 cat output.json
 
-# Kill the firecracker process to exit the workflow
-echo "Stopping VM ..."
-sleep 20
-for i in $( ps ax | awk '/qemu-system-x86_64/ {print $1}' ); do sudo kill -9 ${i}; done
+# # Kill the firecracker process to exit the workflow
+# echo "Stopping VM ..."
+# sleep 20
+# for i in $( ps ax | awk '/qemu-system-x86_64/ {print $1}' ); do sudo kill -9 ${i}; done

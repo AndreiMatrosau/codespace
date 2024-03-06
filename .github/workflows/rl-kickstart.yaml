@@ -274,7 +274,10 @@ jobs:
   #         name: test-output
   #         path: output.json
 
-  #     - name: Stop and Shutdown a VM
-  #       id: stop_shutdown_vm
-  #       run: |
-  #         qm shutdown --forceStop true
+      - name: Stop and Shutdown a VM
+        id: stop_shutdown_vm
+        run: |
+          chmod +x shutdown_vm.sh
+          ./shutdown_vn.sh
+
+        
