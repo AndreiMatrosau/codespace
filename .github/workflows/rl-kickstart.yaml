@@ -111,7 +111,7 @@ jobs:
         id: validate_packer
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
-          chmod 600 id_rsa
+          chmod 400 id_rsa
           packer validate -var-file="dev.pkrvars.hcl" \
                           -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
                           -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
