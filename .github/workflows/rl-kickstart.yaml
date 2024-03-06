@@ -144,6 +144,7 @@ jobs:
           chmod 400 rocky_rsa
           chmod +x run-vm.sh
           ./run-vm.sh rocky_rsa cis-script.sh output.json
+          echo "cat output.json
           cat output.json
           # sudo qemu-system-x86_64 \
           #   -bios /usr/share/ovmf/OVMF.fd \

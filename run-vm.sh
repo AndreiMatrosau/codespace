@@ -2,10 +2,13 @@
 echo "Starting VM ..."
 sudo qemu-system-x86_64 -bios /usr/share/ovmf/OVMF.fd -boot c -drive format=raw,id=drive1,if=none,file=output_rl9/rocky9.3 -cpu host -m 4G -smp 2 -enable-kvm -hda output_rl9/rocky9.3 -netdev user,id=usernet0,hostfwd=tcp::3777-:22 -device virtio-net-pci,netdev=usernet0 -display none -vga none &
 
+# Create output file
+touch output.json
+
 # Try SSH connection until successful or until 1 minute has passed
 echo "Try to connect vis ssh ..."
 counter=0
-until ssh -o StrictHostKeyChecking=no -i $1 -p 3777 rocky@localhost 'bash -s' < $2 > $3
+until ssh -o StrictHostKeyChecking=no -i $1 -p 3777 rocky@localhost 'bash -s' < $2 > output.json
 do
   sleep 5
   counter=$((counter+1))
@@ -15,8 +18,10 @@ do
   fi
   echo "Retrying SSH connection..."
 done
+echo "done"
+cat output.json
 
 # Kill the firecracker process to exit the workflow
 echo "Stopping VM ..."
 sleep 20
-for i in $( ps ax | awk '/qemu-system-x86_64/ {print $1}' ); do kill -9 ${i}; done
+for i in $( ps ax | awk '/qemu-system-x86_64/ {print $1}' ); do sudo kill -9 ${i}; done
