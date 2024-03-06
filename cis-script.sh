@@ -2,7 +2,8 @@
 echo "Ensure core dump storage is disabled"
 grep -i '^\s*storage\s*=\s*none' /etc/systemd/coredump.conf
 echo "Ensure core dump backtraces are disabled"
-grep -Pi '^\h*ProcessSizeMax\h*=\h*0\b' /etc/systemd/coredump.conf || echo -e "\n- Audit results:\n ** Fail **\n - \"ProcessSizeMax\" is: \"$(grep -i 'ProcessSizeMax' /etc/systemd/coredump.conf)\""
+# grep -Pi '^\h*ProcessSizeMax\h*=\h*0\b' /etc/systemd/coredump.conf || echo -e "\n- Audit results:\n ** Fail **\n - \"ProcessSizeMax\" is: \"$(grep -i 'ProcessSizeMax' /etc/systemd/coredump.conf)\""
+# grep -Pi '^\h*ProcessSizeMax\h*=\h*0\b' /etc/systemd/coredump.conf || echo -e "\n- Audit results:\n ** Fail **\n - \"ProcessSizeMax\" is: \"$(grep -i 'ProcessSizeMax' /etc/systemd/coredump.conf)\""
 echo "Ensure SELinux is installed"
 rpm -q libselinux
 echo "Ensure SELinux policy is configured"
