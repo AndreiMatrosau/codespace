@@ -119,3 +119,4 @@ jobs:
         run: |
           chmod +x scripts/shutdown_vm.sh
           bash scripts/shutdown_vm.sh
+          
