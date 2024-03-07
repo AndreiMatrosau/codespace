@@ -84,7 +84,7 @@ jobs:
         run: |
           set +x
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > rocky_rsa
-          set +x
+          set -x
           chmod 600 rocky_rsa
           chmod +x scripts/run_vm.sh
           touch output.json
