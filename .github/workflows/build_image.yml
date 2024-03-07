@@ -107,7 +107,7 @@ jobs:
           chmod 600 rocky_rsa
           chmod +x run_vm.sh
           touch output.json
-          ./run_vm.sh -k rocky_rsa -s cis_script.sh -o output.json -i ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.QCOW2_IMAGE_NAME }} -u ${{ env.VM_USER_NAME}}
+          ./run_vm.sh -k rocky_rsa -s cis_script.sh -o output.json -i ${{ env.QCOW2_IMAGE_NAME }} -u ${{ env.VM_USER_NAME}}
 
       - name: Upload test output as artifact
         id: upload_test_output
