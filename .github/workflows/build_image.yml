@@ -1,4 +1,4 @@
-name: Rl9 live image
+name: Rl9
 
 on:
   workflow_dispatch:
@@ -81,7 +81,11 @@ jobs:
 
       - name: Run Qemu VM test
         run: |
-          ./run-vm.sh rocky_rsa cis-script.sh output.json
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > rocky_rsa
+          chmod 600 rocky_rsa
+          chmod +x run-vm.sh
+          touch output.json
+          ./run_vm.sh rocky_rsa cis-script.sh output.json
 
       - name: Run Qemu VM
         id: run_vm
