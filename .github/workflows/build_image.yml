@@ -87,7 +87,13 @@ jobs:
       - name: Checkout Repository
         id: checkout
         uses: actions/checkout@v4
-        
+
+      - name: Install KVM virtualization
+        id: install_kvm
+        run: |
+          chmod +x scripts/install_kvm.sh
+          bash scripts/install_kvm.sh
+
       - name: Run Qemu VM
         id: run_vm
         run: |
