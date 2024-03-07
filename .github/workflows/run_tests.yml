@@ -5,6 +5,10 @@ on:
     workflows: ["Build Rl9 Packer Image"]
     types:
       - completed
+  push:
+    branches:
+      - main
+      - feature/live_image
 
 env:
   VM_USER_NAME: ${{ vars.VM_USER_NAME }}
