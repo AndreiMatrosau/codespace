@@ -91,11 +91,11 @@ jobs:
       #     bash scripts/run_vm.sh -k rocky_rsa -s scripts/cis_script.sh -o output.json -i ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.QCOW2_IMAGE_NAME }} -u ${{ env.VM_USER_NAME}}
 
       - name: Upload image as artifact
-          id: upload_vm_image
-          uses: actions/upload-artifact@v4
-          with:
-            name: rocky_image
-            path: ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.QCOW2_IMAGE_NAME }}
+        id: upload_vm_image
+        uses: actions/upload-artifact@v4
+        with:
+          name: rocky_image
+          path: ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.QCOW2_IMAGE_NAME }}
 
       - name: Upload output as artifact
         id: cis_test_output
