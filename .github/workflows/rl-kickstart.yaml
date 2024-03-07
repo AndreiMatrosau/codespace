@@ -35,7 +35,7 @@ env:
   VHD_IMAGE_NAME: ${{ vars.VHD_IMAGE_NAME }}
 
 jobs:
-  run_test_on_live_rl9.3_image:
+  run_test_live_image:
     runs-on: ubuntu-20.04
 
     steps:
