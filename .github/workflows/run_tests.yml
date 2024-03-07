@@ -28,7 +28,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: rocky_image
-          path: ${{ QEMU_IMAGE_OUTPUT_DIR }}
+          path: ${{ vars.QEMU_IMAGE_OUTPUT_DIR }}
 
       - name: Run Qemu VM
         id: run_vm
@@ -39,7 +39,7 @@ jobs:
           chmod 600 rocky_rsa
           chmod +x scripts/run_vm.sh
           touch output.json
-          bash scripts/run_vm.sh -k rocky_rsa -s scripts/cis_script.sh -o output.json -i ${{ QEMU_IMAGE_OUTPUT_DIR }}/${{ QCOW2_IMAGE_NAME }} -u ${{ VM_USER_NAME}}
+          bash scripts/run_vm.sh -k rocky_rsa -s scripts/cis_script.sh -o output.json -i ${{ vars.QEMU_IMAGE_OUTPUT_DIR }}/${{ vars.QCOW2_IMAGE_NAME }} -u ${{ VM_USER_NAME}}
 
       - name: Upload test output as artifact
         id: upload_test_output
