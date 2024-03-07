@@ -81,7 +81,7 @@ jobs:
 
   run_test:
     runs-on: ubuntu-20.04
-    depends_on: [build_live_image]
+    needs: build_live_image
 
     steps:
       - name: Run Qemu VM
