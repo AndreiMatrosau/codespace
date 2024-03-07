@@ -72,13 +72,6 @@ jobs:
                                     -var 'ssh_private_key_file=id_rsa' \
                                     -force .
 
-        # - name: Upload image as artifact
-        #   id: upload_vm_image
-        #   uses: actions/upload-artifact@v4
-        #   with:
-        #     name: rocky_image
-        #     path: ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.QCOW2_IMAGE_NAME }}
-
       - name: Run Qemu VM test
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > rocky_rsa
@@ -87,15 +80,22 @@ jobs:
           touch output.json
           ./run_vm.sh rocky_rsa cis_script.sh output.json
 
-      - name: Run Qemu VM
-        id: run_vm
-        run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > rocky_rsa
-          chmod 600 rocky_rsa
-          chmod +x scripts/run_vm.sh
-          touch output.json
-          qemu-system-x86_64 -version
-          bash scripts/run_vm.sh -k rocky_rsa -s scripts/cis_script.sh -o output.json -i ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.QCOW2_IMAGE_NAME }} -u ${{ env.VM_USER_NAME}}
+      # - name: Run Qemu VM
+      #   id: run_vm
+      #   run: |
+      #     echo "${{ secrets.SSH_PRIVATE_KEY }}" > rocky_rsa
+      #     chmod 600 rocky_rsa
+      #     chmod +x scripts/run_vm.sh
+      #     touch output.json
+      #     qemu-system-x86_64 -version
+      #     bash scripts/run_vm.sh -k rocky_rsa -s scripts/cis_script.sh -o output.json -i ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.QCOW2_IMAGE_NAME }} -u ${{ env.VM_USER_NAME}}
+
+      - name: Upload image as artifact
+          id: upload_vm_image
+          uses: actions/upload-artifact@v4
+          with:
+            name: rocky_image
+            path: ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.QCOW2_IMAGE_NAME }}
 
       - name: Upload output as artifact
         id: cis_test_output
