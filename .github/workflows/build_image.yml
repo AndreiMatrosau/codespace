@@ -78,7 +78,7 @@ jobs:
         with:
           name: rocky_image
           path: ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.QCOW2_IMAGE_NAME }}
-W
+
   run_test:
     runs-on: ubuntu-20.04
     depends_on: [build_live_image]
