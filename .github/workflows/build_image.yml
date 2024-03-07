@@ -89,7 +89,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: rocky_image
-          path: '${{ QEMU_IMAGE_OUTPUT_DIR }}/${{ QCOW2_IMAGE_NAME }}'
+          path: ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.QCOW2_IMAGE_NAME }}
 
       - name: Run Qemu VM
         id: run_vm
@@ -104,8 +104,8 @@ jobs:
             -k rocky_rsa \
             -s scripts/cis-script.sh \
             -o output.json \
-            -i ${{ QEMU_IMAGE_OUTPUT_DIR }}/${{ QCOW2_IMAGE_NAME }} \
-            -u ${{ VM_USER_NAME}}
+            -i ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.QCOW2_IMAGE_NAME }} \
+            -u ${{ env.VM_USER_NAME}}
 
       - name: Upload output as artifact
         id: cis_test_output
