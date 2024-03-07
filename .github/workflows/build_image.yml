@@ -82,9 +82,7 @@ jobs:
       - name: Run Qemu VM
         id: run_vm
         run: |
-          set +x
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > rocky_rsa
-          set -x
           chmod 600 rocky_rsa
           chmod +x scripts/run_vm.sh
           touch output.json
