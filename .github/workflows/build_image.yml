@@ -1,4 +1,4 @@
-name: CIS tests with Packer Azure VM Image
+name: Build Rl9 Packer Image
 
 on:
   workflow_dispatch:
@@ -119,4 +119,3 @@ jobs:
         run: |
           chmod +x scripts/shutdown_vm.sh
           bash scripts/shutdown_vm.sh
-          
