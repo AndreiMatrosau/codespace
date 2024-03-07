@@ -1,3 +1,148 @@
+# name: CIS tests with Packer Azure VM Image
+
+# on:
+#   workflow_dispatch:
+#     inputs:
+#       stage:
+#         description: "Deployment Stage"
+#         required: true
+#         type: choice
+#         options:
+#           - "dev"
+#           - "prod"
+#   push:
+#     branches:
+#       - main
+#       - feature/live_image
+
+# env:
+#   PRODUCT_VERSION: ${{ vars.PRODUCT_VERSION }}
+#   RESOURCE_GROUP_NAME: ${{ vars.RESOURCE_GROUP_NAME }}
+#   LOCATION: ${{ vars.LOCATION }}
+#   VM_NAME: ${{ vars.VM_NAME }}
+#   VM_USER_NAME: ${{ vars.VM_USER_NAME }}
+#   STORAGE_ACCOUNT_NAME: ${{ vars.STORAGE_ACCOUNT_NAME }}
+#   CONTAINER_NAME: ${{ vars.CONTAINER_NAME }}
+#   IMAGE_PUBLISHER: ${{ vars.IMAGE_PUBLISHER }}
+#   IMAGE_OFFER: ${{ vars.IMAGE_OFFER }}
+#   IMAGE_SKU: ${{ vars.IMAGE_SKU }}
+#   COMPUTE_GALLERY_NAME: ${{ vars.COMPUTE_GALLERY_NAME }}
+#   COMPUTE_GALLERY_RESOURCE_GROUP_NAME: ${{ vars.COMPUTE_GALLERY_RESOURCE_GROUP_NAME }}
+#   IMAGE_DEFINITION_NAME: ${{ vars.IMAGE_DEFINITION_NAME }}
+#   IMAGE_VERSION: ${{ vars.IMAGE_VERSION }}
+#   QEMU_IMAGE_OUTPUT_DIR: ${{ vars.QEMU_IMAGE_OUTPUT_DIR }}
+#   QCOW2_IMAGE_NAME: ${{ vars.QCOW2_IMAGE_NAME }}
+#   VHD_IMAGE_NAME: ${{ vars.VHD_IMAGE_NAME }}
+
+# jobs:
+#   build_packer_image:
+#     runs-on: ubuntu-20.04
+
+#     steps:
+#       - name: Checkout Repository
+#         id: checkout
+#         uses: actions/checkout@v4
+
+#       - name: Install KVM virtualization
+#         id: install_kvm
+#         run: |
+#           # chmod +x install_kvm.sh
+#           # ./install_kvm.sh
+#           sudo apt-get update
+#           sudo apt-get install qemu qemu-kvm libvirt-daemon-system -y
+#           sudo apt-get install libvirt-clients virt-manager bridge-utils -y
+#           sudo usermod -aG kvm $USER
+#           sudo chmod 666 /dev/kvm
+#           sudo addgroup libvirtd
+#           sudo usermod -aG libvirtd $USER
+#           sudo adduser $USER libvirt
+#           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660"' | sudo tee /etc/udev/rules.d/99-kvm.rules
+#           sudo udevadm control --reload-rules
+#           sudo systemctl restart libvirtd
+#           export DISPLAY=
+
+#       - name: Set up Packer
+#         id: setup_packer
+#         uses: hashicorp/setup-packer@main
+#         with:
+#           version: ${{ env.PRODUCT_VERSION }}
+
+#       - name: Run `packer init`
+#         id: init_packer
+#         run: packer init .
+
+#       - name: Run `packer validate`
+#         id: validate_packer
+#         run: |
+#           echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
+#           chmod 600 id_rsa
+#           packer validate -var-file="dev.pkrvars.hcl" \
+#                           -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
+#                           -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
+#                           -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
+#                           -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
+#                           -var 'ssh_private_key_file=id_rsa' .
+                          
+#       - name: Build Image
+#         id: build_packer_image
+#         run: |
+#           echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
+#           chmod 600 id_rsa
+#           PACKER_LOG=1 packer build -var-file="dev.pkrvars.hcl" \
+#                                     -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
+#                                     -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
+#                                     -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
+#                                     -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
+#                                     -var 'ssh_private_key_file=id_rsa' \
+#                                     -force .
+
+#       # - name: Install Git LFS
+#       #   run: |
+#       #     sudo apt-get install git-lfs
+
+#       # - name: Track file
+#       #   run: |
+#       #     cd output_rl9
+#       #     git lfs track "rocky9.3"
+
+#       # - name: Add file
+#       #   run: |
+#       #     cd output_rl9
+#       #     git add rocky9.3
+
+#       # - name: Commit changes
+#       #   run: |
+#       #     git config --local user.email "andrei_matrosau@outlook.com"
+#       #     git config --local user.name "Andrei Matrosau"
+#       #     git commit -m "Add image file to LFS"
+
+#       # - name: Push changes
+#       #   run: |
+#       #     git push          
+
+#       - name: Run Qemu VM
+#         id: run_vm
+#         run: |
+#           ls -lh output_rl9/rocky9.3
+#           echo "${{ secrets.SSH_PRIVATE_KEY }}" > rocky_rsa
+#           chmod 400 rocky_rsa
+#           chmod +x run-vm.sh
+#           touch output.json
+#           ./run-vm.sh rocky_rsa cis-script.sh output.json
+
+#       - name: Upload output as artifact
+#         id: cis_test_output
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: test-output
+#           path: output.json
+
+#       - name: Stop and Shutdown a VM
+#         id: stop_shutdown_vm
+#         run: |
+#           chmod +x shutdown_vm.sh
+#           ./shutdown_vm.sh
+
 name: CIS tests with Packer Azure VM Image
 
 on:
@@ -35,8 +180,46 @@ env:
   VHD_IMAGE_NAME: ${{ vars.VHD_IMAGE_NAME }}
 
 jobs:
+  # create_infrastrucutre:
+  #   runs-on: ubuntu-20.04
+
+      # steps:
+      #   - name: Checkout Repository
+      #     id: checkout
+      #     uses: actions/checkout@v4
+
+      # - name: Login to Azure
+      #   uses: azure/login@v1
+      #   with:
+      #     creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # - name: Create Resource Group
+      #   id: create_resource_group
+      #   run: |
+      #     az group create \
+      #       --name ${{ env.RESOURCE_GROUP_NAME }} \
+      #       --location ${{ env.LOCATION }}
+
+      # - name: Create Storage Account
+      #   id: create_storage_account
+      #   run: |
+      #     az storage account create \
+      #       --name ${{ env.STORAGE_ACCOUNT_NAME }} \
+      #       --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
+      #       --location ${{ env.LOCATION }} \
+      #       --sku Standard_LRS \
+      #       --allow-blob-public-access true
+        
+      # - name: Create Container
+      #   id: create_container
+      #   run: |
+      #     az storage container create \
+      #       --name ${{ env.CONTAINER_NAME }} \
+      #       --account-name ${{ env.STORAGE_ACCOUNT_NAME }}
+
   build_packer_image:
     runs-on: ubuntu-20.04
+    # needs: [create_infrastrucutre]
 
     steps:
       - name: Checkout Repository
@@ -46,8 +229,6 @@ jobs:
       - name: Install KVM virtualization
         id: install_kvm
         run: |
-          # chmod +x install_kvm.sh
-          # ./install_kvm.sh
           sudo apt-get update
           sudo apt-get install qemu qemu-kvm libvirt-daemon-system -y
           sudo apt-get install libvirt-clients virt-manager bridge-utils -y
@@ -60,7 +241,6 @@ jobs:
           sudo udevadm control --reload-rules
           sudo systemctl restart libvirtd
           export DISPLAY=
-
       - name: Set up Packer
         id: setup_packer
         uses: hashicorp/setup-packer@main
@@ -87,7 +267,7 @@ jobs:
         id: build_packer_image
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
-          chmod 600 id_rsa
+          chmod 400 id_rsa
           PACKER_LOG=1 packer build -var-file="dev.pkrvars.hcl" \
                                     -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
                                     -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
@@ -95,41 +275,14 @@ jobs:
                                     -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
                                     -var 'ssh_private_key_file=id_rsa' \
                                     -force .
-
-      # - name: Install Git LFS
-      #   run: |
-      #     sudo apt-get install git-lfs
-
-      # - name: Track file
-      #   run: |
-      #     cd output_rl9
-      #     git lfs track "rocky9.3"
-
-      # - name: Add file
-      #   run: |
-      #     cd output_rl9
-      #     git add rocky9.3
-
-      # - name: Commit changes
-      #   run: |
-      #     git config --local user.email "andrei_matrosau@outlook.com"
-      #     git config --local user.name "Andrei Matrosau"
-      #     git commit -m "Add image file to LFS"
-
-      # - name: Push changes
-      #   run: |
-      #     git push          
-
       - name: Run Qemu VM
         id: run_vm
         run: |
-          ls -lh output_rl9/rocky9.3
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > rocky_rsa
           chmod 400 rocky_rsa
           chmod +x run-vm.sh
           touch output.json
           ./run-vm.sh rocky_rsa cis-script.sh output.json
-
       - name: Upload output as artifact
         id: cis_test_output
         uses: actions/upload-artifact@v4
