@@ -28,7 +28,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: rocky_image
-          path: ${{ vars.QEMU_IMAGE_OUTPUT_DIR }}
+          path: ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.QCOW2_IMAGE_NAME }}
 
       - name: Run Qemu VM
         id: run_vm
