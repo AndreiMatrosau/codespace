@@ -16,8 +16,12 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
+      - name: Checkout Repository
+        id: checkout
+        uses: actions/checkout@v4
+
       - name: Download image artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: rocky_image
           path: ${{ QEMU_IMAGE_OUTPUT_DIR }}
@@ -33,15 +37,15 @@ jobs:
           touch output.json
           bash scripts/run_vm.sh -k rocky_rsa -s scripts/cis_script.sh -o output.json -i ${{ QEMU_IMAGE_OUTPUT_DIR }}/${{ QCOW2_IMAGE_NAME }} -u ${{ VM_USER_NAME}}
 
-      - name: Upload output as artifact
-        id: cis_test_output
+      - name: Upload test output as artifact
+        id: upload_test_output
         uses: actions/upload-artifact@v4
         with:
           name: test-output
           path: output.json
 
-      - name: Stop and Shutdown a VM
-        id: stop_shutdown_vm
+      - name: Shutdown a VM
+        id: shutdown_vm
         run: |
           chmod +x scripts/shutdown_vm.sh
           bash scripts/shutdown_vm.sh

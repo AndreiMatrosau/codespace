@@ -73,7 +73,7 @@ jobs:
                                     -force .
 
       - name: Upload image as artifact
-        id: image_artifact
+        id: upload_vm_image
         uses: actions/upload-artifact@v4
         with:
           name: rocky_image
