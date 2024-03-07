@@ -79,7 +79,7 @@ jobs:
         #     name: rocky_image
         #     path: ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.QCOW2_IMAGE_NAME }}
 
-      - name: Run Qemu VM
+      - name: Run Qemu VM test
         run: |
           ./run-vm.sh rocky_rsa cis-script.sh output.json
 
