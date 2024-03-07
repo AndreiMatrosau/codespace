@@ -19,18 +19,8 @@ env:
   PRODUCT_VERSION: ${{ vars.PRODUCT_VERSION }}
   VM_NAME: ${{ vars.VM_NAME }}
   VM_USER_NAME: ${{ vars.VM_USER_NAME }}
-  STORAGE_ACCOUNT_NAME: ${{ vars.STORAGE_ACCOUNT_NAME }}
-  CONTAINER_NAME: ${{ vars.CONTAINER_NAME }}
-  IMAGE_PUBLISHER: ${{ vars.IMAGE_PUBLISHER }}
-  IMAGE_OFFER: ${{ vars.IMAGE_OFFER }}
-  IMAGE_SKU: ${{ vars.IMAGE_SKU }}
-  COMPUTE_GALLERY_NAME: ${{ vars.COMPUTE_GALLERY_NAME }}
-  COMPUTE_GALLERY_RESOURCE_GROUP_NAME: ${{ vars.COMPUTE_GALLERY_RESOURCE_GROUP_NAME }}
-  IMAGE_DEFINITION_NAME: ${{ vars.IMAGE_DEFINITION_NAME }}
-  IMAGE_VERSION: ${{ vars.IMAGE_VERSION }}
   QEMU_IMAGE_OUTPUT_DIR: ${{ vars.QEMU_IMAGE_OUTPUT_DIR }}
   QCOW2_IMAGE_NAME: ${{ vars.QCOW2_IMAGE_NAME }}
-  VHD_IMAGE_NAME: ${{ vars.VHD_IMAGE_NAME }}
 
 jobs:
   run_test_live_image:
@@ -44,7 +34,7 @@ jobs:
       - name: Install KVM virtualization
         id: install_kvm
         run: |
-          chmod +x install_kvm.sh
+          chmod +x scripts/install_kvm.sh
           bash scripts/install_kvm.sh
           # sudo apt-get update
           # sudo apt-get install qemu qemu-kvm libvirt-daemon-system -y
@@ -94,21 +84,28 @@ jobs:
                                     -var 'ssh_private_key_file=id_rsa' \
                                     -force .
 
-      - name: Upload output as artifact
+      - name: Upload image as artifact
         id: image_artifact
         uses: actions/upload-artifact@v4
         with:
           name: rocky_image
-          path: output_rl9/rocky9.3
+          path: ${{ QEMU_IMAGE_OUTPUT_DIR }}/${{ QCOW2_IMAGE_NAME }}
 
       - name: Run Qemu VM
         id: run_vm
         run: |
+          set +x
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > rocky_rsa
+          set +x
           chmod 600 rocky_rsa
-          chmod +x run-vm.sh
+          chmod +x scripts/run-vm.sh
           touch output.json
-          ./run-vm.sh rocky_rsa cis-script.sh output.json
+          bash scripts/run-vm.sh \
+            -k rocky_rsa \
+            -s scripts/cis-script.sh \
+            -o output.json \
+            -i ${{ QEMU_IMAGE_OUTPUT_DIR }}/${{ QCOW2_IMAGE_NAME }} \
+            -u ${{ VM_USER_NAME}}
 
       - name: Upload output as artifact
         id: cis_test_output
@@ -120,5 +117,5 @@ jobs:
       - name: Stop and Shutdown a VM
         id: stop_shutdown_vm
         run: |
-          chmod +x shutdown_vm.sh
-          ./shutdown_vm.sh
+          chmod +x scripts/shutdown_vm.sh
+          bash scripts/shutdown_vm.sh
