@@ -79,21 +79,6 @@ jobs:
           name: rocky_image
           path: ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.QCOW2_IMAGE_NAME }}
 
-  run_test:
-    runs-on: ubuntu-20.04
-    needs: build_live_image
-
-    steps:
-      - name: Checkout Repository
-        id: checkout
-        uses: actions/checkout@v4
-
-      - name: Install KVM virtualization
-        id: install_kvm
-        run: |
-          chmod +x scripts/install_kvm.sh
-          bash scripts/install_kvm.sh
-
       - name: Run Qemu VM
         id: run_vm
         run: |
