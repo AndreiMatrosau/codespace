@@ -14,25 +14,15 @@ do
 done
 
 echo "Starting VM ..."
-echo $key
-echo $image
-echo $script
-echo $output
-echo $user
-if ! sudo qemu-system-x86_64 -bios /usr/share/ovmf/OVMF.fd -boot c -drive format=raw,id=drive1,if=none,file=output_rl9/rocky9.3 -cpu host -m 4G -smp 2 -enable-kvm -hda output_rl9/rocky9.3 -netdev user,id=usernet0,hostfwd=tcp::3777-:22 -device virtio-net-pci,netdev=usernet0 -display none -vga none & then
+if ! sudo qemu-system-x86_64 -bios /usr/share/ovmf/OVMF.fd -boot c -drive format=raw,id=drive1,if=none,file=$image -cpu host -m 4G -smp 2 -enable-kvm -hda $image -netdev user,id=usernet0,hostfwd=tcp::3777-:22 -device virtio-net-pci,netdev=usernet0 -display none -vga none & then
     echo "Failed to start VM. Exiting..."
     exit 1
 fi
-# if ! sudo qemu-system-x86_64 -bios /usr/share/ovmf/OVMF.fd -boot c -drive format=raw,id=drive1,if=none,file=$image -cpu host -m 4G -smp 2 -enable-kvm -hda $image -netdev user,id=usernet0,hostfwd=tcp::3777-:22 -device virtio-net-pci,netdev=usernet0 -display none -vga none & then
-#     echo "Failed to start VM. Exiting..."
-#     exit 1
-# fi
 
 # Try SSH connection until successful or until 1 minute has passed
 echo "Try to connect via ssh ..."
 counter=0
-# until ssh -o StrictHostKeyChecking=no -i $key -p 3777 $user@localhost 'bash -s' < $script > $output
-until ssh -o StrictHostKeyChecking=no -i rocky_rsa -p 3777 rocky@localhost 'bash -s' < cis_script.sh > output.json
+until ssh -o StrictHostKeyChecking=no -i $key -p 3777 $user@localhost 'bash -s' < $script > $output
   sleep 5
   counter=$((counter+1))
   if [ $counter -ge 12 ]; then
