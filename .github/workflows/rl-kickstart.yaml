@@ -17,8 +17,6 @@ on:
 
 env:
   PRODUCT_VERSION: ${{ vars.PRODUCT_VERSION }}
-  RESOURCE_GROUP_NAME: ${{ vars.RESOURCE_GROUP_NAME }}
-  LOCATION: ${{ vars.LOCATION }}
   VM_NAME: ${{ vars.VM_NAME }}
   VM_USER_NAME: ${{ vars.VM_USER_NAME }}
   STORAGE_ACCOUNT_NAME: ${{ vars.STORAGE_ACCOUNT_NAME }}
@@ -46,18 +44,20 @@ jobs:
       - name: Install KVM virtualization
         id: install_kvm
         run: |
-          sudo apt-get update
-          sudo apt-get install qemu qemu-kvm libvirt-daemon-system -y
-          sudo apt-get install libvirt-clients virt-manager bridge-utils -y
-          sudo usermod -aG kvm $USER
-          sudo chmod 666 /dev/kvm
-          sudo addgroup libvirtd
-          sudo usermod -aG libvirtd $USER
-          sudo adduser $USER libvirt
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660"' | sudo tee /etc/udev/rules.d/99-kvm.rules
-          sudo udevadm control --reload-rules
-          sudo systemctl restart libvirtd
-          export DISPLAY=
+          chmod +x install_kvm.sh
+          bash scripts/install_kvm.sh
+          # sudo apt-get update
+          # sudo apt-get install qemu qemu-kvm libvirt-daemon-system -y
+          # sudo apt-get install libvirt-clients virt-manager bridge-utils -y
+          # sudo usermod -aG kvm $USER
+          # sudo chmod 666 /dev/kvm
+          # sudo addgroup libvirtd
+          # sudo usermod -aG libvirtd $USER
+          # sudo adduser $USER libvirt
+          # echo 'KERNEL=="kvm", GROUP="kvm", MODE="0660"' | sudo tee /etc/udev/rules.d/99-kvm.rules
+          # sudo udevadm control --reload-rules
+          # sudo systemctl restart libvirtd
+          # export DISPLAY=
 
       - name: Set up Packer
         id: setup_packer
@@ -94,30 +94,6 @@ jobs:
                                     -var 'ssh_private_key_file=id_rsa' \
                                     -force .
 
-      # - name: Install Git LFS
-      #   run: |
-      #     sudo apt-get install git-lfs
-
-      # - name: Track file
-      #   run: |
-      #     cd output_rl9
-      #     git lfs track "rocky9.3"
-
-      # - name: Add file
-      #   run: |
-      #     cd output_rl9
-      #     git add rocky9.3
-
-      # - name: Commit changes
-      #   run: |
-      #     git config --local user.email "andrei_matrosau@outlook.com"
-      #     git config --local user.name "Andrei Matrosau"
-      #     git commit -m "Add image file to LFS"
-
-      # - name: Push changes
-      #   run: |
-      #     git push
-
       - name: Upload output as artifact
         id: image_artifact
         uses: actions/upload-artifact@v4
@@ -128,7 +104,6 @@ jobs:
       - name: Run Qemu VM
         id: run_vm
         run: |
-          ls -l output_rl9
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > rocky_rsa
           chmod 600 rocky_rsa
           chmod +x run-vm.sh
