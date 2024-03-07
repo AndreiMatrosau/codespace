@@ -85,7 +85,7 @@ jobs:
           chmod 600 rocky_rsa
           chmod +x run_vm.sh
           touch output.json
-          ./run_vm.sh rocky_rsa cis-script.sh output.json
+          ./run_vm.sh rocky_rsa cis_script.sh output.json
 
       - name: Run Qemu VM
         id: run_vm
