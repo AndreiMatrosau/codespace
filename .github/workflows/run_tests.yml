@@ -2,9 +2,18 @@ name: Run Tests on Image
 
 on:
   workflow_run:
-    workflows: ["Build Image and Run Tests"]
+    workflows: ["Build Rl9 Packer Image"]
     types:
       - completed
+  workflow_dispatch:
+  inputs:
+    stage:
+      description: "Deployment Stage"
+      required: true
+      type: choice
+      options:
+        - "dev"
+        - "prod"
 
 env:
   VM_USER_NAME: ${{ vars.VM_USER_NAME }}
@@ -27,11 +36,11 @@ jobs:
         run: |
           set +x
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > rocky_rsa
-          set +x
+          set -x
           chmod 600 rocky_rsa
-          chmod +x scripts/run-vm.sh
+          chmod +x scripts/run_vm.sh
           touch output.json
-          bash scripts/run-vm.sh -k rocky_rsa -s scripts/cis-script.sh -o output.json -i ${{ QEMU_IMAGE_OUTPUT_DIR }}/${{ QCOW2_IMAGE_NAME }} -u ${{ VM_USER_NAME}}
+          bash scripts/run_vm.sh -k rocky_rsa -s scripts/cis_script.sh -o output.json -i ${{ QEMU_IMAGE_OUTPUT_DIR }}/${{ QCOW2_IMAGE_NAME }} -u ${{ VM_USER_NAME}}
 
       - name: Upload output as artifact
         id: cis_test_output
