@@ -1,15 +1,15 @@
 name: Build Live Image
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       stage:
         description: "Deployment Stage"
         required: true
-        type: choice
-        options:
-          - "dev"
-          - "prod"
+        type: string
+    secrets:
+      SSH_PRIVATE_KEY:
+        required: true
 
 jobs:
   build_live_image:

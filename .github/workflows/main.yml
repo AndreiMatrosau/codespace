@@ -25,6 +25,10 @@ env:
 jobs:
   build_live_image:
     uses: ./.github/workflows/build-image.yml
+    with:
+      stage: ${{ github.event.inputs.stage }}
+    secrets:
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
   run_tests:
     runs-on: ubuntu-20.04
