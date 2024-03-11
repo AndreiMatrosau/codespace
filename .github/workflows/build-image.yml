@@ -1,0 +1,84 @@
+name: Build Live Image
+
+on:
+  workflow_run:
+    workflows: ["Rl9"]
+    types:
+      - completed
+
+jobs:
+  build_live_image:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Checkout Repository
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Cache KVM setup
+        id: cache_kvm
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.kvm
+          key: kvm-${{ runner.os }}-${{ hashFiles('scripts/install_kvm.sh') }}
+
+      - name: Install KVM virtualization
+        id: install_kvm
+        run: |
+          if [ -e ~/.kvm ]; then
+            echo "KVM already installed, skipping installation."
+          else
+            chmod +x scripts/install_kvm.sh
+            bash scripts/install_kvm.sh
+          fi
+
+      - name: Cache Packer setup
+        id: cache_packer
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.packer
+          key: packer-${{ runner.os }}-${{ hashFiles('packer.json') }}
+
+      - name: Set up Packer
+        id: setup_packer
+        uses: hashicorp/setup-packer@main
+        with:
+          version: ${{ env.PRODUCT_VERSION }}
+
+      - name: Run `packer init`
+        id: init_packer
+        run: packer init .
+
+      - name: Run `packer validate`
+        id: validate_packer
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
+          chmod 600 id_rsa
+          packer validate -var-file="dev.pkrvars.hcl" \
+                          -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
+                          -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
+                          -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
+                          -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
+                          -var 'ssh_private_key_file=id_rsa' .
+                          
+      - name: Build Image
+        id: build_packer_image
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
+          chmod 600 id_rsa
+          PACKER_LOG=1 packer build -var-file="dev.pkrvars.hcl" \
+                                    -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
+                                    -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
+                                    -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
+                                    -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
+                                    -var 'ssh_private_key_file=id_rsa' \
+                                    -force .
+
+      - name: Upload image as artifact
+        id: upload_vm_image
+        uses: actions/upload-artifact@v4
+        with:
+          name: rocky_image
+          path: ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.QCOW2_IMAGE_NAME }}

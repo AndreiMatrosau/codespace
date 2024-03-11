@@ -1,121 +1,121 @@
-name: Rl9
+# name: Rl9
 
-on:
-  workflow_dispatch:
-    inputs:
-      stage:
-        description: "Deployment Stage"
-        required: true
-        type: choice
-        options:
-          - "dev"
-          - "prod"
-  push:
-    branches:
-      - main
-      - feature/live_image
+# on:
+#   workflow_dispatch:
+#     inputs:
+#       stage:
+#         description: "Deployment Stage"
+#         required: true
+#         type: choice
+#         options:
+#           - "dev"
+#           - "prod"
+#   push:
+#     branches:
+#       - main
+#       - feature/live_image
 
-env:
-  PRODUCT_VERSION: ${{ vars.PRODUCT_VERSION }}
-  VM_NAME: ${{ vars.VM_NAME }}
-  VM_USER_NAME: ${{ vars.VM_USER_NAME }}
-  QEMU_IMAGE_OUTPUT_DIR: ${{ vars.QEMU_IMAGE_OUTPUT_DIR }}
-  QCOW2_IMAGE_NAME: ${{ vars.QCOW2_IMAGE_NAME }}
+# env:
+#   PRODUCT_VERSION: ${{ vars.PRODUCT_VERSION }}
+#   VM_NAME: ${{ vars.VM_NAME }}
+#   VM_USER_NAME: ${{ vars.VM_USER_NAME }}
+#   QEMU_IMAGE_OUTPUT_DIR: ${{ vars.QEMU_IMAGE_OUTPUT_DIR }}
+#   QCOW2_IMAGE_NAME: ${{ vars.QCOW2_IMAGE_NAME }}
 
-jobs:
-  build_live_image:
-    runs-on: ubuntu-20.04
+# jobs:
+#   build_live_image:
+#     runs-on: ubuntu-20.04
 
-    steps:
-      - name: Checkout Repository
-        id: checkout
-        uses: actions/checkout@v4
+#     steps:
+#       - name: Checkout Repository
+#         id: checkout
+#         uses: actions/checkout@v4
 
-      - name: Install KVM virtualization
-        id: install_kvm
-        run: |
-          chmod +x scripts/install_kvm.sh
-          bash scripts/install_kvm.sh
+#       - name: Install KVM virtualization
+#         id: install_kvm
+#         run: |
+#           chmod +x scripts/install_kvm.sh
+#           bash scripts/install_kvm.sh
 
-      - name: Set up Packer
-        id: setup_packer
-        uses: hashicorp/setup-packer@main
-        with:
-          version: ${{ env.PRODUCT_VERSION }}
+#       - name: Set up Packer
+#         id: setup_packer
+#         uses: hashicorp/setup-packer@main
+#         with:
+#           version: ${{ env.PRODUCT_VERSION }}
 
-      - name: Run `packer init`
-        id: init_packer
-        run: packer init .
+#       - name: Run `packer init`
+#         id: init_packer
+#         run: packer init .
 
-      - name: Run `packer validate`
-        id: validate_packer
-        run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
-          chmod 600 id_rsa
-          packer validate -var-file="dev.pkrvars.hcl" \
-                          -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
-                          -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
-                          -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
-                          -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
-                          -var 'ssh_private_key_file=id_rsa' .
+#       - name: Run `packer validate`
+#         id: validate_packer
+#         run: |
+#           echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
+#           chmod 600 id_rsa
+#           packer validate -var-file="dev.pkrvars.hcl" \
+#                           -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
+#                           -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
+#                           -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
+#                           -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
+#                           -var 'ssh_private_key_file=id_rsa' .
                           
-      - name: Build Image
-        id: build_packer_image
-        run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
-          chmod 600 id_rsa
-          PACKER_LOG=1 packer build -var-file="dev.pkrvars.hcl" \
-                                    -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
-                                    -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
-                                    -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
-                                    -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
-                                    -var 'ssh_private_key_file=id_rsa' \
-                                    -force .
+#       - name: Build Image
+#         id: build_packer_image
+#         run: |
+#           echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
+#           chmod 600 id_rsa
+#           PACKER_LOG=1 packer build -var-file="dev.pkrvars.hcl" \
+#                                     -var 'client_id=${{ secrets.AZURE_CLIENT_ID }}' \
+#                                     -var 'client_secret=${{ secrets.AZURE_CLIENT_SECRET }}' \
+#                                     -var 'tenant_id=${{ secrets.AZURE_TENANT_ID }}' \
+#                                     -var 'subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}' \
+#                                     -var 'ssh_private_key_file=id_rsa' \
+#                                     -force .
 
-      - name: Upload image as artifact
-        id: upload_vm_image
-        uses: actions/upload-artifact@v4
-        with:
-          name: rocky_image
-          path: ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.QCOW2_IMAGE_NAME }}
+#       - name: Upload image as artifact
+#         id: upload_vm_image
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: rocky_image
+#           path: ${{ env.QEMU_IMAGE_OUTPUT_DIR }}/${{ env.QCOW2_IMAGE_NAME }}
 
-  run_tests:
-    runs-on: ubuntu-20.04
-    needs: build_live_image
+#   run_tests:
+#     runs-on: ubuntu-20.04
+#     needs: build_live_image
 
-    steps:
-      - name: Checkout Repository
-        id: checkout
-        uses: actions/checkout@v4       
+#     steps:
+#       - name: Checkout Repository
+#         id: checkout
+#         uses: actions/checkout@v4       
 
-      - name: Download image artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: rocky_image
+#       - name: Download image artifact
+#         uses: actions/download-artifact@v4
+#         with:
+#           name: rocky_image
 
-      - name: Install KVM virtualization
-        id: install_kvm
-        run: |
-          chmod +x scripts/install_kvm.sh
-          bash scripts/install_kvm.sh
+#       - name: Install KVM virtualization
+#         id: install_kvm
+#         run: |
+#           chmod +x scripts/install_kvm.sh
+#           bash scripts/install_kvm.sh
 
-      - name: Run Qemu VM
-        id: run_vm
-        run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > rocky_rsa
-          chmod 600 rocky_rsa
-          chmod +x scripts/run_vm.sh
-          bash scripts/run_vm.sh rocky_rsa scripts/cis_script.sh
+#       - name: Run Qemu VM
+#         id: run_vm
+#         run: |
+#           echo "${{ secrets.SSH_PRIVATE_KEY }}" > rocky_rsa
+#           chmod 600 rocky_rsa
+#           chmod +x scripts/run_vm.sh
+#           bash scripts/run_vm.sh rocky_rsa scripts/cis_script.sh
 
-      - name: Upload test output as artifact
-        id: upload_test_output
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-output
-          path: output.json
+#       - name: Upload test output as artifact
+#         id: upload_test_output
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: test-output
+#           path: output.json
 
-      - name: Shutdown a VM
-        id: shutdown_vm
-        run: |
-          chmod +x scripts/shutdown_vm.sh
-          bash scripts/shutdown_vm.sh
+#       - name: Shutdown a VM
+#         id: shutdown_vm
+#         run: |
+#           chmod +x scripts/shutdown_vm.sh
+#           bash scripts/shutdown_vm.sh

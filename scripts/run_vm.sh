@@ -14,10 +14,8 @@
 # done
 
 # echo "Starting VM ..."
-# if ! sudo qemu-system-x86_64 -bios /usr/share/ovmf/OVMF.fd -boot c -drive format=raw,id=drive1,if=none,file=$image -cpu host -m 4G -smp 2 -enable-kvm -hda $image -netdev user,id=usernet0,hostfwd=tcp::3777-:22 -device virtio-net-pci,netdev=usernet0 -display none -vga none & then
-#     echo "Failed to start VM. Exiting..."
-#     exit 1
-# fi
+# sudo qemu-system-x86_64 -bios /usr/share/ovmf/OVMF.fd -boot c -drive format=raw,id=drive1,if=none,file=$image -cpu host -m 4G -smp 2 -enable-kvm -hda $image -netdev user,id=usernet0,hostfwd=tcp::3777-:22 -device virtio-net-pci,netdev=usernet0 -display none -vga none & then
+
 
 # # Try SSH connection until successful or until 1 minute has passed
 # echo "Try to connect via ssh ..."
