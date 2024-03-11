@@ -36,8 +36,8 @@ jobs:
     strategy:
       matrix:
         cis_test: 
-          - cis_test_1.sh
-          - cis_test_2.sh
+          - cis_script_1.sh
+          - cis_script_2.sh
 
     steps:
       - name: Checkout Repository
@@ -59,7 +59,6 @@ jobs:
         id: run_vm
         run: |
           ls -l
-          
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > rocky_rsa
           chmod 600 rocky_rsa
           chmod +x scripts/run_vm.sh
@@ -70,7 +69,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-output-${{ matrix.cis_test }}
-          path: cis_test_outputs
+          path: output.json
 
       - name: Shutdown a VM
         id: shutdown_vm

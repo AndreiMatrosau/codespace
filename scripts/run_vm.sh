@@ -40,8 +40,7 @@ do
         k) key=${OPTARG};;
         s) script=${OPTARG};;
         u) user=${OPTARG};;
-        i) image=${OPTARG};;
-        
+        i) image=${OPTARG};;    
     esac
 done
 
