@@ -56,7 +56,7 @@ jobs:
             echo "${{ secrets.SSH_PRIVATE_KEY }}" > rocky_rsa
             chmod 600 rocky_rsa
             chmod +x scripts/run_vm.sh
-            bash scripts/run_vm.sh rocky_rsa scripts/cis_script.sh
+            bash scripts/run_vm.sh rocky_rsa scripts/cis_script.sh ${{ env.VM_USER_NAME }}
 
       - name: Upload test output as artifact
         id: upload_test_output

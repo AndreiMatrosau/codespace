@@ -39,7 +39,7 @@ sudo qemu-system-x86_64 -bios /usr/share/ovmf/OVMF.fd -boot c -drive format=raw,
 # Try SSH connection until successful or until 1 minute has passed
 echo "Try to connect via ssh ..."
 counter=0
-until ssh -o StrictHostKeyChecking=no -i $1 -p 3777 rocky@localhost 'bash -s' < $2 > output.json
+until ssh -o StrictHostKeyChecking=no -i $1 -p 3777 $3@localhost 'bash -s' < $2 > output.json
 do
   sleep 5
   counter=$((counter+1))
