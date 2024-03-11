@@ -3,10 +3,13 @@ name: Rl9
 on:
   workflow_dispatch:
     inputs:
-      cis_test: 
-        description: 'Test file to run'
+      stage:
+        description: "Deployment Stage"
         required: true
-        default: 'scripts/cis_script.sh'     
+        type: choice
+        options:
+          - "dev"
+          - "prod"
   push:
     branches:
       - main
@@ -53,7 +56,7 @@ jobs:
             echo "${{ secrets.SSH_PRIVATE_KEY }}" > rocky_rsa
             chmod 600 rocky_rsa
             chmod +x scripts/run_vm.sh
-            bash scripts/run_vm.sh rocky_rsa ${{ inputs.cis_test }} ${{ env.VM_USER_NAME }} ${{ env.QCOW2_IMAGE_NAME }}
+            bash scripts/run_vm.sh rocky_rsa $(pwd)/scripts/cis_script.sh ${{ env.VM_USER_NAME }}
 
       - name: Upload test output as artifact
         id: upload_test_output
