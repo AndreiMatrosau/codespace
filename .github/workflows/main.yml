@@ -59,10 +59,11 @@ jobs:
         id: run_vm
         run: |
           ls -l
+          
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > rocky_rsa
           chmod 600 rocky_rsa
           chmod +x scripts/run_vm.sh
-          bash scripts/run_vm.sh rocky_rsa ${{ github.workspace }}/tests/${{ matrix.cis_test }} ${{ env.VM_USER_NAME }} ${{ env.QCOW2_IMAGE_NAME }}
+          bash scripts/run_vm.sh rocky_rsa ${{ github.workspace }}/cis_tests/${{ matrix.cis_test }} ${{ env.VM_USER_NAME }} ${{ env.QCOW2_IMAGE_NAME }}
 
       - name: Upload test output as artifact
         id: upload_test_output
